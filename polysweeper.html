@@ -66,11 +66,6 @@ Hex: {
 		return [xo, yo];
 	},
 
-	getTransform: function (row, col) {
-		var [xo, yo] = this.getOffset(row, col);
-		return 'translate('+xo+','+yo+')';
-	},
-
 	getAdjacency: function (row, col) {
 		if (col & 1) {
 			/* shifted up */
@@ -102,9 +97,7 @@ Hex: {
 Pen: {
 	uW: 1.7320508075689,
 	uH: 1.3660254037845,
-	uPts: '0.0,0.5 0.8660254037845,0.0 0.3660254037845,-0.8660254037845 -0.3660254037845,-0.8660254037845 -0.8660254037845,0.0',
-	//uPts: '0.0,0.866025403784 0.866025403784,0.366025403784 0.366025403784,-0.5 -0.366025403784,-0.5 -0.866025403784,0.366025403784',
-	//uPts: '0.0,0.683012701892 0.866025403784,0.183012701892 0.366025403784,-0.683012701892 -0.366025403784,-0.683012701892 -0.866025403784,0.183012701892',
+	uPts: '0.0,0.683012701892 0.866025403784,0.183012701892 0.366025403784,-0.683012701892 -0.366025403784,-0.683012701892 -0.866025403784,0.183012701892',
 
 	viewBoxFor: function (rows, cols) {
 		return '0 0 '+0.8660254037845*(cols+1.2)+' '+this.uW*(rows+0.7);
@@ -123,13 +116,15 @@ Pen: {
 	},
 
 	getOffset: function (row, col) {
-		var xo = 1 + 0.8660254037845*col;
+		var xo = 1.2 - 0.366025403784*(row&1) + 0.683012701892*col;
 		var yo = this.uW*(row + 1.1);
 
 		if (row & 1) {
-			yo -= 0.8660254037845*(col & 1);
+			xo += 0.366025403784*(2*Math.floor(col/4) + (col & 3 ? 1 : 0) + (col & 2 ? 1 : 0));
+			yo -= 1.0490381056762499*(col & 1) - 0.366025403784*((col & 3) == 1);
 		} else {
-			yo -= 0.8660254037845*(col & 1);
+			xo += 0.366025403784*(2*Math.floor(col/4) + ((col & 3) == 3));
+			yo -= 1.0490381056762499*(col & 1) - 0.366025403784*((col & 3) == 3);
 		}
 
 		return [xo, yo];
@@ -273,7 +268,81 @@ Sqr: {
 		];
 
 	},
+},
 
+Rho: {
+	uW: 1.299038105676658,
+	uH: 0.75,
+	uPts: '-0.649519052838329,0 0.0,-0.375 0.649519052838329,0.0 0.0,0.375',
+
+	viewBoxFor: function (rows, cols) {
+		return '0 0 ' + (Math.floor(cols/2)+0.5) + ' ' + (1.125*rows+0.7);
+	},
+
+	getRotation: function (row, col) {
+		return 120*((col-1) % 3);
+	},
+
+	getOffset: function (row, col) {
+		var xo = 0.4 + 0.25*this.uW*col;
+		var yo = 1.1 + 1.125*row;
+
+		xo += 0.25*this.uW*(Math.floor(col / 3) + 2*(row & 1));
+		yo -= ((col % 3) == 1 ? 0.5625 : 0);
+
+		return [xo, yo];
+	},
+
+	getAdjacency: function (row, col) {
+		var c = col % 3;
+		var cshift = 3 * (row & 1);
+
+		if (c == 0) {
+			return [
+				[row - 1, col - 3 + cshift],
+				[row - 1, col - 1 + cshift],
+
+				[row    , col - 2],
+				[row    , col - 1],
+				[row    , col + 1],
+				[row    , col + 2],
+
+				[row + 1, col - 2 + cshift],
+				[row + 1, col - 1 + cshift],
+				[row + 1, col     + cshift],
+				[row + 1, col + 1 + cshift],
+			];
+		} else if (c == 1) {
+			return [
+				[row - 1, col - 4 + cshift],
+				[row - 1, col - 2 + cshift],
+				[row - 1, col - 1 + cshift],
+				[row - 1, col + 1 + cshift],
+
+				[row    , col - 3],
+				[row    , col - 2],
+				[row    , col - 1],
+				[row    , col + 1],
+				[row    , col + 2],
+				[row    , col + 3],
+			];
+		} else {
+			return [
+				[row - 1, col - 2 + cshift],
+				[row - 1, col     + cshift],
+
+				[row    , col - 2],
+				[row    , col - 1],
+				[row    , col + 1],
+				[row    , col + 2],
+
+				[row + 1, col - 4 + cshift],
+				[row + 1, col - 3 + cshift],
+				[row + 1, col - 2 + cshift],
+				[row + 1, col - 1 + cshift],
+			];
+		}
+	},
 },
 
 Tri: {
@@ -393,6 +462,31 @@ function Game(shape, rows, cols, bombs, board, sbTime, sbScore) {
 	}
 }
 
+/* small helpers for mapAround method */
+
+function isBomb(node) {
+	return (node && node.bomb) ? 1 : 0;
+}
+
+function isFlagged(node) {
+	return (node && node.flagged) ? 1 : 0;
+}
+
+function incCount(n) {
+	if (n) { n.count = (n.count || 0) + 1; }
+}
+
+function decCount(n) {
+	if (n) { n.count -= 1; }
+}
+
+function sum(a,b) {
+	return a+b;
+}
+
+/* *** */
+
+
 Game.prototype.getNodeAt = function (row, col) {
 	if (row >= 0 && col >= 0 && row < this.rows && col < this.cols) {
 		var idx = this.mOffset + row*this.cols + col;
@@ -447,7 +541,6 @@ Game.prototype.addRandomBomb = function () {
 	}
 	n.bomb = 1;
 
-	var incCount = function (n) { if (n) { n.count = (n.count || 0) + 1; } };
 	this.mapAround(incCount, n);
 };
 
@@ -550,7 +643,6 @@ Game.prototype.revealNodeHelper = function () {
 				/* First click; take pity by moving the bomb elsewhere*/
 				this.addRandomBomb();
 				el.bomb = undefined;
-				var decCount = function (n) { if (n) {--n.count;} };
 				this.mapAround(decCount,el);
 			} else {
 				el.setAttribute('style', gs.bomb);
@@ -581,24 +673,6 @@ Game.prototype.revealNodeHelper = function () {
 
 	return false;
 }
-
-function isBomb(node) {
-	if (node && node.bomb) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-function isFlagged(node) {
-	if (node && node.flagged) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-function sum(a,b) { return a+b; }
 
 function buildBoard() {
 
@@ -649,6 +723,7 @@ function buildBoard() {
   <option value='Hex'>Hexagon</option>
   <option value='Pen'>Pentagonal (Cairo)</option>
   <option value='Sqr'>Square</option>
+  <option value='Rho'>Rhombus</option>
   <option value='Tri'>Triangle</option>
 </select>
 <label for='bombCount'>Bombs</label>
