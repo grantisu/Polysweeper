@@ -3,48 +3,91 @@
 <head>
   <title>Polysweeper</title>
   <meta charset="UTF-8">
-<style>
+  <style id='theCSS'>
 
 body { text-align: center; }
 
-#theboard {
-	border: 1px dashed black;
+li { display: inline-block; }
+
+label { margin-left: 1.75em; }
+
+input { width: 3em; }
+
+#theBoard {
 	margin: auto;
 }
 
-</style>
+#theButton {
+	display: block;
+	margin: 1em auto;
+}
 
-<script>
+#theCount, #theTime, #hiScore {
+	display: inline-block;
+	margin: auto;
+	padding: 0.1em 2em;
+	min-width: 9em;
+}
+
+/* SVG style */
+
+polygon {
+	stroke:#000;
+	stroke-width:0.025;
+	stroke-linejoin:bevel;
+}
+
+.unclicked {
+	fill: url(#grayMesa);
+}
+
+.clicked {
+	fill:white;
+	fill-opacity:0;
+	stroke-width:0.01;
+}
+
+.flagged {
+	fill: url(#yellowMesa);
+}
+
+.bomb {
+	fill: url(#redMesa);
+}
+
+.ptext {
+	font-size:0.4px;
+	font-weight:bold;
+	text-anchor:middle;
+}
+
+.ptext1 { fill: #229; }
+.ptext2 { fill: #282; }
+.ptext3 { fill: #762; }
+.ptext4 { fill: #922; }
+.ptext5 { fill: #600; }
+.ptext6 { fill: #626; }
+.ptext7 { fill: #146; }
+.ptext8 { fill: #243; }
+.ptext9 { fill: #222; }
+
+.unclicked:hover {
+	fill: #fff;
+}
+
+  </style>
+
+  <script>
 
 /* globals, yay */
 var SVGNS = "http://www.w3.org/2000/svg";
 var XLINKNS = "http://www.w3.org/1999/xlink";
 var G;
 
-/* ghetto style */
-var gs = {
-unclicked: 'fill:gray;stroke:#000;stroke-width:0.05;stroke-linejoin:bevel;',
-clicked  : 'fill:white;fill-opacity:0;stroke:#000;stroke-width:0.01;stroke-linejoin:bevel;',
-flagged  : 'fill:yellow;stroke:#000;stroke-width:0.05;stroke-linejoin:bevel;',
-bomb     : 'fill:red;stroke:#000;stroke-width:0.05;stroke-linejoin:bevel;',
-text     : 'font-size:0.4px;font-weight:bold;text-anchor:middle;',
-color    : {
-	1: '#229',
-	2: '#282',
-	3: '#762',
-	4: '#922',
-	5: '#600',
-	6: '#626',
-	7: '#146',
-	8: '#243',
-	9: '#222'
-}
-};
-
-
 var shapes = {
 
 Hex: {
+	name: 'Hexagon',
 	uW: 1.0,
 	uH: Math.sin(Math.PI / 3.0),
 	uPts: '0.5,0.0 0.25,0.433012701892 -0.25,0.433012701892 -0.5,0.0 -0.25,-0.433012701892 0.25,-0.433012701892',
@@ -95,6 +138,7 @@ Hex: {
 },
 
 Pen: {
+	name: 'Pentagon (Cairo)',
 	uW: 1.7320508075689,
 	uH: 1.3660254037845,
 	uPts: '0.0,0.683012701892 0.866025403784,0.183012701892 0.366025403784,-0.683012701892 -0.366025403784,-0.683012701892 -0.866025403784,0.183012701892',
@@ -237,6 +281,7 @@ Pen: {
 },
 
 Sqr: {
+	name: 'Square',
 	uW: 1.0,
 	uH: 1.0,
 	uPts: '-0.5,-0.5 0.5,-0.5 0.5,0.5 -0.5,0.5',
@@ -271,12 +316,13 @@ Sqr: {
 },
 
 Rho: {
+	name: 'Rhombus',
 	uW: 1.299038105676658,
 	uH: 0.75,
 	uPts: '-0.649519052838329,0 0.0,-0.375 0.649519052838329,0.0 0.0,0.375',
 
 	viewBoxFor: function (rows, cols) {
-		return '0 0 ' + (Math.floor(cols/2)+0.5) + ' ' + (1.125*rows+0.7);
+		return '0 0 ' + (1.3*Math.floor((cols+2)/3)+.75) + ' ' + (1.125*rows+0.7);
 	},
 
 	getRotation: function (row, col) {
@@ -346,6 +392,7 @@ Rho: {
 },
 
 Tri: {
+	name: 'Triangle',
 	uW: 0.8660254037844386,
 	uH: 0.75,
 	uPts: '0.433012701892,-0.25 0.0,0.5 -0.433012701892,-0.25',
@@ -413,7 +460,7 @@ Tri: {
 
 };
 
-function Game(shape, rows, cols, bombs, board, sbTime, sbScore) {
+function Game(shape, rows, cols, bombs, board, sbTime, sbScore, hiScore) {
 	this.shape   = shape;
 	this.rows    = rows;
 	this.cols    = cols;
@@ -439,27 +486,32 @@ function Game(shape, rows, cols, bombs, board, sbTime, sbScore) {
 
 	this.bombMarked = 0;
 	this.revealedCount = 0;
-	this.mOffset = 0;
 	this.nodesToReveal = [];
 	this.nodesRevealed = {};
+	this.numScores = 10;
 
 	this.board.innerHTML = '';
 	this.sbTime.innerHTML = '';
 	this.sbScore.innerHTML = '';
 
-	this.msvg = document.createElementNS(SVGNS, 'svg');
-	this.msvg.setAttribute('version', '1.1');
-	this.msvg.setAttribute('viewBox', this.shape.viewBoxFor(this.rows, this.cols));
+	this.initSVG();
 
 	for (var i = 0; i < this.rows; i++) {
 		for (var j = 0; j < this.cols; j++) {
-			this.msvg.appendChild(this.makePolyAt(i, j));
+			this.pg.appendChild(this.makePolyAt(i, j));
 		}
 	}
 
 	for (var b = 0; b < this.bombs; b++) {
 		this.addRandomBomb();
 	}
+
+	this.svg.onmouseup = this.boardClick.bind(this);
+	this.svg.oncontextmenu = function (ev) { return false; };
+
+	hiScore.onclick = function (ev) { this.showHiScore(); }.bind(this);
+
+	this.board.appendChild(this.svg);
 }
 
 /* small helpers for mapAround method */
@@ -489,8 +541,8 @@ function sum(a,b) {
 
 Game.prototype.getNodeAt = function (row, col) {
 	if (row >= 0 && col >= 0 && row < this.rows && col < this.cols) {
-		var idx = this.mOffset + row*this.cols + col;
-		return this.msvg.childNodes[idx];
+		var idx = row*this.cols + col;
+		return this.pg.childNodes[idx];
 	} else {
 		return undefined;
 	}
@@ -512,16 +564,15 @@ Game.prototype.mapAround = function (fMap, node) {
 
 Game.prototype.makePolyAt = function (row, col) {
 	var shape = this.shape;
-	var [xo, yo] = shape.getOffset(row, col);
+	var off = shape.getOffset(row, col);
 	var rot = shape.getRotation(row, col);
 
 	var p = document.createElementNS(SVGNS, 'polygon');
 	p.setAttribute('points', shape.uPts);
 	p.setAttribute('transform',
-		'translate('+xo+','+yo+')' +
+		'translate('+off[0]+','+off[1]+')' +
 		(rot ? ' rotate('+rot+')' : '')
 	);
-	p.setAttribute('style', gs.unclicked);
 	
 	p.clickable = true;
 	p.bomb = 0;
@@ -555,14 +606,49 @@ Game.prototype.updateScore = function () {
 
 Game.prototype.updateSize = function (ev) {
 	var mH = 0.80*window.innerHeight;
-	document.getElementById('theboard').firstChild.style.maxHeight = mH+'px';
+	document.getElementById('theBoard').firstChild.style.maxHeight = mH+'px';
 };
 
-Game.prototype.end = function () {
+Game.prototype.scoreKey = function () {
+	return this.shape.name+':'+this.bombs+':'+this.rows+':'+this.cols;
+};
+
+Game.prototype.showHiScore = function (msg) {
+	var scoreStr = msg ? msg+"\n\n" : '';
+	var slist = localStorage.getItem(this.scoreKey());
+
+	if (slist) {
+		slist = JSON.parse(slist);
+		scoreStr += "High Scores:\n"+slist.join("\n");
+	} else {
+		scoreStr += "No high scores yet!";
+	}
+
+	alert(scoreStr);
+};
+
+Game.prototype.end = function (score) {
+	this.updateTime();
 	clearInterval(this.sInt);
+
+	if (score) {
+		var sk = this.scoreKey();
+		var slist = JSON.parse(localStorage.getItem(sk)) || [];
+		var hs = slist.slice(-1)[0];
+		
+		if (!hs || score < hs) {
+			slist.push(score);
+			slist.sort(function (a, b) { return a - b; });
+			if (slist.length > this.numScores) {
+				slist.pop();
+			}
+			localStorage.setItem(sk, JSON.stringify(slist));
+		}
+	}
+
 	this.sInt = undefined;
-	this.msvg.onmouseup = undefined;
-	this.msvg.oncontextmenu = undefined;
+	this.svg.onmouseup = undefined;
+	this.svg.oncontextmenu = undefined;
 };
 
 Game.prototype.boardClick = function (ev) {
@@ -572,15 +658,9 @@ Game.prototype.boardClick = function (ev) {
 		if (ev.button == 0) {
 			this.revealNode(el);
 		} else if (el.clickable && ev.button == 2) {
-			if (el.flagged) {
-				el.flagged = false;
-				el.setAttribute('style', gs.unclicked);
-				this.bombMarked -= 1;
-			} else {
-				el.flagged = true;
-				el.setAttribute('style', gs.flagged);
-				this.bombMarked += 1;
-			}
+			el.classList.toggle('flagged');
+			el.flagged = !el.flagged;
+			this.bombMarked += el.flagged ? 1 : -1;
 		} else if (
 		  !el.clickable &&
 		  ev.button == 2 &&
@@ -612,19 +692,21 @@ Game.prototype.checkReveal = function (n) {
 };
 
 Game.prototype.addTextFor = function (node) {
-	var p = node.parentNode;
+	var p = this.svg;
 	var shape = this.shape;
 
-	var [xo, yo] = shape.getOffset(node.row, node.col);
+	var off = shape.getOffset(node.row, node.col);
 
 	var t = document.createElementNS(SVGNS, 'text');
 	t.textContent = node.count;
-	t.setAttribute('style', gs.text + 'fill:' + (gs.color[node.count] || '#000')+';');
-	t.setAttribute('transform', 'translate('+xo+','+(yo+0.125)+')');
+	t.setAttribute('class', 'ptext');
+	if (node.count < 10) {
+		t.classList.add('ptext' + node.count);
+	}
+	t.setAttribute('transform', 'translate('+off[0]+','+(off[1]+0.125)+')');
 
 	/* make sure text appears beneath everything */
-	p.insertBefore(t, p.firstChild);
-	this.mOffset += 1;
+	p.insertBefore(t, p.lastChild);
 };
 
 Game.prototype.revealNodeHelper = function () {
@@ -636,7 +718,7 @@ Game.prototype.revealNodeHelper = function () {
 		el.clickable = false;
 		var row = el.row;
 		var col = el.col;
-		el.setAttribute('style', gs.clicked);
+		el.setAttribute('class', 'clicked');
 
 		if (el.bomb) {
 			if (this.revealedCount == 0) {
@@ -645,7 +727,7 @@ Game.prototype.revealNodeHelper = function () {
 				el.bomb = undefined;
 				this.mapAround(decCount,el);
 			} else {
-				el.setAttribute('style', gs.bomb);
+				el.setAttribute('class', 'bomb');
 				if (this.sInt) {
 					this.end();
 					for (var j = 0; j < this.cols; j++) {
@@ -666,13 +748,45 @@ Game.prototype.revealNodeHelper = function () {
 
 		if (this.sInt && ++this.revealedCount == (this.rows*this.cols - this.bombs)) {
 			var dur = Date.now() - this.start;
-			this.end();
-			alert("Winnar!\n"+(0.001*dur).toFixed(2)+" secs");
+			var score = (0.001*dur).toFixed(2);
+			this.end(score);
+
+			this.showHiScore("Winner!\nScore: "+score+" secs");
 		}
 	}
 
 	return false;
 }
+
+Game.prototype.initSVG = function () {
+	var divHack = document.createElement('div');
+	divHack.innerHTML = "" + 
+"<svg version='1.1' viewBox='"+this.shape.viewBoxFor(this.rows, this.cols)+"' preserveAspectRatio='xMinYMin meet'>" + 
+	"<link rel='stylesheet' href='#theCSS' type='text/CSS' />" +
+	"<defs>" +
+		"<radialGradient id='grayMesa' fx='0.5' fy='0.5'>" +
+			"<stop offset='0%' stop-color='#888888' />" +
+			"<stop offset='50%' stop-color='#777778' />" +
+			"<stop offset='100%' stop-color='#444448' />" +
+		"</radialGradient>" +
+		"<radialGradient id='yellowMesa' fx='0.5' fy='0.5'>" +
+			"<stop offset='0%' stop-color='#dfdf87' />" +
+			"<stop offset='50%' stop-color='#cfcf63' />" +
+			"<stop offset='100%' stop-color='#444422' />" +
+		"</radialGradient>" +
+		"<radialGradient id='redMesa' fx='0.5' 'fy=0.5'>" +
+			"<stop offset='0%' stop-color='#f00' />" +
+			"<stop offset='100%' stop-color='#444448' />" +
+		"</linearGradient>" +
+	"</defs>" +
+"</svg>";
+
+	this.pg = document.createElementNS(SVGNS, 'g');
+	this.pg.setAttribute('fill', 'url(#grayMesa)');
+
+	this.svg = divHack.firstChild;
+	this.svg.appendChild(this.pg);
+};
 
 function buildBoard() {
 
@@ -685,23 +799,19 @@ function buildBoard() {
 		parseInt(document.getElementById('rowCount').value),
 		parseInt(document.getElementById('colCount').value),
 		parseInt(document.getElementById('bombCount').value),
-		document.getElementById('theboard'),
-		document.getElementById('thetime'),
-		document.getElementById('thescore')
+		document.getElementById('theBoard'),
+		document.getElementById('theTime'),
+		document.getElementById('theCount'),
+		document.getElementById('hiScore')
 	);
 
-
-	document.getElementById('thebutton').textContent = 'Restart';
+	document.getElementById('theButton').textContent = 'Reset';
 
 	window.onresize = G.updateSize.bind(G);
-	G.msvg.onmouseup = G.boardClick.bind(G);
-	G.msvg.oncontextmenu = function (ev) { return false; };
-
-	G.board.appendChild(G.msvg);
 	G.updateSize();
 	G.updateScore();
 	G.updateTime();
-	G.sInt = setInterval(G.updateTime.bind(G), 500);
+	G.sInt = setInterval(G.updateTime.bind(G), 300);
 	G.start = Date.now();
 
 	bEnd = Date.now();
@@ -709,30 +819,51 @@ function buildBoard() {
 	console.log('Board built in '+(bEnd-bStart)+' msec');
 }
 
-</script>
+function initPage() {
+	var st = document.getElementById('shapeType');
+
+	for (var s in shapes) {
+		var o = document.createElement('option');
+		o.setAttribute('value', s);
+		o.textContent = shapes[s].name;
+		st.appendChild(o);
+	}
+
+	st.value = localStorage.getItem('lastShape') || 'Hex';
+	st.onchange = function (ev) { localStorage.setItem('lastShape', ev.target.value); };
+	buildBoard();
+}
+
+  </script>
 </head>
-<body onload='buildBoard()'>
+<body onload='initPage()'>
 
 <h1>Polysweeper</h1>
 
-<div id='thetime'></div>
-<div id='thescore'></div>
-<div id='theboard'></div>
+<ul>
+<li>
 <label for='shapeType'>Shape</label>
-<select name='shapeType' id='shapeType' value='Hex'>
-  <option value='Hex'>Hexagon</option>
-  <option value='Pen'>Pentagonal (Cairo)</option>
-  <option value='Sqr'>Square</option>
-  <option value='Rho'>Rhombus</option>
-  <option value='Tri'>Triangle</option>
-</select>
+<select name='shapeType' id='shapeType' value='Hex'></select>
+</li>
+<li>
 <label for='bombCount'>Bombs</label>
 <input type='text' name='bombCount' id='bombCount' value=49>
+</li>
+<li>
 <label for='rowCount'>Rows</label>
 <input type='text' name='rowCount' id='rowCount' value=16>
+</li>
+<li>
 <label for='colCount'>Cols</label>
 <input type='text' name='colCount' id='colCount' value=30>
-<button id='thebutton' type='button' onclick='buildBoard()'>Start</button>
+</li>
+</ul>
+
+<button id='theButton' type='button' onclick='buildBoard()'>Start</button>
+<div id='theBoard'></div>
+<div id='theTime'></div>
+<div id='theCount'></div>
+<button id='hiScore' type='button'>High Scores</button>
 
 </body>
 </html>
