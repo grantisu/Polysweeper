@@ -5,24 +5,49 @@
   <meta charset="UTF-8">
   <style id='theCSS'>
 
-body { text-align: center; }
+body {
+	font-weight: bold;
+	text-align: center;
+	font-family: "DejaVu Sans", "Bitstream Vera Sans", "Lucida Grande", "Lucida Sans", Corbel, Verdana, sans-serif;
+	margin: 1em;
+	padding: 0;
+}
+
+ul { list-style: none; }
 
 li { display: inline-block; }
 
 label { margin-left: 1.75em; }
 
-input { width: 3em; }
+input,select {
+	background-color: #fff;
+	border: 1px solid #000;
+	box-shadow: 0 0 8px  rgba(0,0,0,0.1), 0 0 16px rgba(0,0,0,0.1);
+}
+
+input {
+	text-align: right;
+	width: 2.5em;
+}
+
+select {
+	text-align: left;
+	min-width: 8em;
+	max-width: 16em;
+}
 
 #theBoard {
 	margin: auto;
 }
 
 #theButton {
+	border: 1px solid #000;
 	display: block;
 	margin: 1em auto;
 }
 
 #theCount, #theTime, #hiScore {
+	border: 1px solid #000;
 	display: inline-block;
 	margin: auto;
 	padding: 0.1em 2em;
