@@ -1,22 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Trisweeper</title>
+  <title>Polysweeper</title>
   <meta charset="UTF-8">
 <style>
 
-body {
-	text-align: center;
-}
+body { text-align: center; }
 
 #theboard {
 	border: 1px dashed black;
 	margin: auto;
-}
-
-#theboard svg {
-	max-width: 60em;
-	max-height: 50em;
 }
 
 </style>
@@ -25,26 +18,16 @@ body {
 
 /* globals, yay */
 var svgns = "http://www.w3.org/2000/svg";
-var start;
-var rows;
-var cols;
-var bombTotal;
-var bombMarked;
-var revealed;
-var mOffset;
-var sbTime;
-var sbScore;
-var msvg;
-var sInt;
+var G;
 
 /* ghetto style */
-var p_unclicked = 'fill:gray;stroke:#000;stroke-width:0.05;stroke-linejoin:bevel;';
-var p_clicked   = 'fill:white;fill-opacity:0;stroke:#000;stroke-width:0.01;stroke-linejoin:bevel;';
-var p_flagged   = 'fill:yellow;stroke:#000;stroke-width:0.05;stroke-linejoin:bevel;';
-var p_maybe     = 'fill:orange;stroke:#000;stroke-width:0.05;stroke-linejoin:bevel;';
-var p_bomb      = 'fill:red;stroke:#000;stroke-width:0.05;stroke-linejoin:bevel;';
-var t_clicked   = 'font-size:0.4px;font-weight:bold;text-anchor:middle;';
-var r_color = {
+var gs = {
+unclicked: 'fill:gray;stroke:#000;stroke-width:0.05;stroke-linejoin:bevel;',
+clicked  : 'fill:white;fill-opacity:0;stroke:#000;stroke-width:0.01;stroke-linejoin:bevel;',
+flagged  : 'fill:yellow;stroke:#000;stroke-width:0.05;stroke-linejoin:bevel;',
+bomb     : 'fill:red;stroke:#000;stroke-width:0.05;stroke-linejoin:bevel;',
+text     : 'font-size:0.4px;font-weight:bold;text-anchor:middle;',
+color    : {
 	1: '#229',
 	2: '#282',
 	3: '#762',
@@ -53,25 +36,219 @@ var r_color = {
 	6: '#626',
 	7: '#146',
 	8: '#243',
-	9: '#222',
+	9: '#222'
+}
+};
+
+
+var shapes = {
+
+Hex: {
+	uH: Math.sin(Math.PI / 3.0),
+
+	viewBoxFor: function (rows, cols) {
+		return '0 0 ' + (0.75*cols + 0.5) + ' ' + (this.uH*rows + 0.7);
+	},
+
+	ptsStr: function (row, col) {
+		var pstr = '';
+		var xo = 0.55 + 0.75*col;
+		var yo = 1.05 + this.uH*row;
+
+		if (col & 1) { yo -= 0.5*this.uH; }
+
+		for (var i = 0; i < 6; i++) {
+			var x = xo + 0.5*Math.cos(i * Math.PI / 3.0);
+			var y = yo + 0.5*Math.sin(i * Math.PI / 3.0);
+			pstr += x+','+y+' ';
+		}
+		
+		return pstr;
+	},
+
+	fitText: function (tNode, row, col) {
+		tNode.setAttribute('x', 0.55 + 0.75*col);
+		tNode.setAttribute('y', 1.15 + this.uH*(row - 0.5*(col & 1)));
+	},
+
+	applyAroundNode: function (fMap, fReduce, node) {
+		var rArr = [];
+		var row = node.row;
+		var col = node.col;
+		
+		if (!fReduce) {
+			fReduce = function(a, b) { return a && b; };
+		}
+
+		if (col & 1) {
+			/* shifted up */
+			rArr = [
+				fMap(get_node(row - 1, col - 1)),
+				fMap(get_node(row    , col - 1)),
+
+				fMap(get_node(row - 1, col    )),
+				fMap(get_node(row + 1, col    )),
+
+				fMap(get_node(row    , col + 1)),
+				fMap(get_node(row - 1, col + 1)),
+			];
+		} else {
+			rArr = [
+				fMap(get_node(row + 1, col - 1)),
+				fMap(get_node(row    , col - 1)),
+
+				fMap(get_node(row - 1, col    )),
+				fMap(get_node(row + 1, col    )),
+
+				fMap(get_node(row    , col + 1)),
+				fMap(get_node(row + 1, col + 1)),
+			];
+		}
+
+		return rArr.reduce(fReduce);
+	},
+},
+
+Sqr: {
+	viewBoxFor: function (rows, cols) {
+		return '0 0 ' + (cols+0.2) + ' ' + (rows+0.2);
+	},
+
+	ptsStr: function (row, col) {
+		var pstr;
+		var xo = col + 0.05;
+		var yo = row + 0.05;
+
+		return xo+','+yo+' '+(xo+1)+','+yo+' '+(xo+1)+','+(yo+1)+' '+xo+','+(yo+1);
+	},
+
+	fitText: function (tNode, row, col) {
+		tNode.setAttribute('x', col + 0.55);
+		tNode.setAttribute('y', row + 0.65);
+	},
+
+	applyAroundNode: function (fMap, fReduce, node) {
+		var rArr = [];
+		var row = node.row;
+		var col = node.col;
+		
+		if (!fReduce) {
+			fReduce = function(a, b) { return a && b; };
+		}
+
+		rArr = [
+			fMap(get_node(row - 1, col - 1)),
+			fMap(get_node(row - 1, col    )),
+			fMap(get_node(row - 1, col + 1)),
+
+			fMap(get_node(row    , col - 1)),
+			fMap(get_node(row    , col + 1)),
+
+			fMap(get_node(row + 1, col - 1)),
+			fMap(get_node(row + 1, col    )),
+			fMap(get_node(row + 1, col + 1)),
+		];
+
+		return rArr.reduce(fReduce);
+	},
+
+},
+
+Tri: {
+	viewBoxFor: function (rows, cols) {
+		return '0 0 ' + 0.5*(cols+1) + ' ' + (rows+0.1);
+	},
+
+	ptsStr: function (row, col) {
+		var pstr;
+		var xo = 0.5*col;
+		var yo = row + 0.05;
+
+		if ((row + col) & 1) {
+			pstr = (xo+0.0)+','+(yo+0.0)+' '+(xo+1.0)+','+(yo+0.0)+' '+(xo+0.5)+','+(yo+1.0);
+		} else {
+			pstr = (xo+0.0)+','+(yo+1.0)+' '+(xo+0.5)+','+(yo+0.0)+' '+(xo+1.0)+','+(yo+1.0);
+		}
+		
+		return pstr;
+	},
+
+	fitText: function (tNode, row, col) {
+		tNode.setAttribute('x', col*0.5 + 0.5);
+		tNode.setAttribute('y', row + 0.8 - 0.3*((row+col) & 1));
+	},
+
+	applyAroundNode: function (fMap, fReduce, node) {
+		var rArr = [];
+		var row = node.row;
+		var col = node.col;
+		
+		if (!fReduce) {
+			fReduce = function(a, b) { return a && b; };
+		}
+
+		if ((row+col) & 1) {
+			/* pointing down */
+			rArr = [
+				fMap(get_node(row + 1, col - 1)),
+				fMap(get_node(row + 1, col    )),
+				fMap(get_node(row + 1, col + 1)),
+
+				fMap(get_node(row    , col - 2)),
+				fMap(get_node(row    , col - 1)),
+				fMap(get_node(row    , col + 1)),
+				fMap(get_node(row    , col + 2)),
+
+				fMap(get_node(row - 1, col - 2)),
+				fMap(get_node(row - 1, col - 1)),
+				fMap(get_node(row - 1, col    )),
+				fMap(get_node(row - 1, col + 1)),
+				fMap(get_node(row - 1, col + 2))
+			];
+		} else {
+			/* pointing up */
+			rArr = [
+				fMap(get_node(row - 1, col - 1)),
+				fMap(get_node(row - 1, col    )),
+				fMap(get_node(row - 1, col + 1)),
+
+				fMap(get_node(row    , col - 2)),
+				fMap(get_node(row    , col - 1)),
+				fMap(get_node(row    , col + 1)),
+				fMap(get_node(row    , col + 2)),
+
+				fMap(get_node(row + 1, col - 2)),
+				fMap(get_node(row + 1, col - 1)),
+				fMap(get_node(row + 1, col    )),
+				fMap(get_node(row + 1, col + 1)),
+				fMap(get_node(row + 1, col + 2))
+			];
+		}
+
+		return rArr.reduce(fReduce);
+	},
+},
+
 };
 
 function get_node(row, col) {
-	if (row >= 0 && col >= 0 && row < rows && col < cols) {
-		var idx = mOffset + row*cols + col;
-		return msvg.childNodes[idx];
+	if (row >= 0 && col >= 0 && row < G.rows && col < G.cols) {
+		var idx = G.mOffset + row*G.cols + col;
+		return G.msvg.childNodes[idx];
 	} else {
 		return undefined;
 	}
 }
 
+/* ##### */
+
 function update_time() {
-	var dur = Math.floor((Date.now() - start) / 1000);
-	sbTime.textContent = 'Time ' + dur;
+	var dur = G.start ? Math.floor((Date.now() - G.start ) / 1000) : 0;
+	G.sbTime.textContent = 'Time ' + dur;
 }
 
 function update_score() {
-	sbScore.textContent = 'UXB ' + (bombTotal - bombMarked);
+	G.sbScore.textContent = 'UXB ' + (G.bombTotal - G.bombMarked);
 }
 
 function update_size(ev) {
@@ -79,128 +256,115 @@ function update_size(ev) {
 	document.getElementById('theboard').firstChild.style.maxHeight = mH+'px';
 }
 
+/* ##### */
+
+function incCount(n) { if (n) { n.count = (n.count || 0) + 1; } }
+
+function set_random_bomb() {
+	var row, col;
+	var n = {bomb: true};
+	while (!n || n.bomb) {
+		row = Math.floor(Math.random()*G.rows);
+		col = Math.floor(Math.random()*G.cols);
+		n = get_node(row, col);
+	}
+	n.bomb = 1;
+
+	G.shape.applyAroundNode(incCount, null, n);
+};
+
 function end_game() {
-	clearInterval(sInt);
-	sInt = undefined;
-	msvg.onclick = undefined;
-	msvg.oncontextmenu = undefined;
+	clearInterval(G.sInt);
+	G.sInt = undefined;
+	G.msvg.onmouseup = undefined;
+	G.msvg.oncontextmenu = undefined;
 }
 
 function brd_click(ev) {
 	var el = ev.target;
 
-	if (ev.button == 0) {
-		click_helper(el);
-	} else if (el.clickable && ev.button == 2) {
-		if (el.flagged) {
-			el.flagged = false;
-			el.setAttribute('style', p_unclicked);
-			bombMarked -= 1;
-		} else {
-			el.flagged = true;
-			el.setAttribute('style', p_flagged);
-			bombMarked += 1;
+	try{
+		if (ev.button == 0) {
+			reveal_node(el);
+		} else if (el.clickable && ev.button == 2) {
+			if (el.flagged) {
+				el.flagged = false;
+				el.setAttribute('style', gs.unclicked);
+				G.bombMarked -= 1;
+			} else {
+				el.flagged = true;
+				el.setAttribute('style', gs.flagged);
+				G.bombMarked += 1;
+			}
+		} else if (
+		  !el.clickable &&
+		  ev.button == 2 &&
+		  el.count &&
+		  G.shape.applyAroundNode(isFlagged, sum, el) == el.count
+		) {
+			G.shape.applyAroundNode(reveal_node, null, el);
 		}
-	} else if (!el.clickable && ev.button == 2 && el.count) {
-		reveal_around(el.row, el.col);
+
+		update_score();
+
+	} catch (err) {
+		alert(err);
+		end_game();
 	}
-
-	update_score();
-
 	return false;
 }
 
-function click_helper(el) {
+function reveal_node(el) {
 	if (!(el && (el.clickable && !el.flagged))) { return; }
 	el.clickable = false;
-
+	
 	var row = el.row;
 	var col = el.col;
-	el.setAttribute('style', p_clicked);
+	el.setAttribute('style', gs.clicked);
 
 	if (el.bomb) {
-		el.setAttribute('style', p_bomb);
-		if (sInt) { end_game(); }
-		for (var j = 0; j < cols; j++) {
-		for (var i = 0; i < rows; i++) {
-			click_helper(get_node(i, j));
+		if (G.revealed == 0) {
+			/* First click; take pity */
+			set_random_bomb();
+			el.bomb = undefined;
+			G.shape.applyAroundNode(function (n) { if (n) {--n.count;} },null,el);
+		} else {
+			el.setAttribute('style', gs.bomb);
+			if (G.sInt) { end_game(); }
+			for (var j = 0; j < G.cols; j++) {
+			for (var i = 0; i < G.rows; i++) {
+				reveal_node(get_node(i, j));
+			}
+			}
+			return false;
 		}
-		}
-		return false;
 	}
 	
 	if (el.count) {
 		var p = el.parentNode;
 		var t = document.createElementNS(svgns, 'text');
-		var c = 
-		t.setAttribute('x', col*0.5 + 0.5);
-		t.setAttribute('y', row + 0.8 - 0.3*((row+col) & 1));
-		t.setAttribute('style', t_clicked + 'fill:' + r_color[el.count]+';');
 		t.textContent = el.count;
+		G.shape.fitText(t, row, col);
+		t.setAttribute('style', gs.text + 'fill:' + (gs.color[el.count] || '#000')+';');
 		/* make sure text appears beneath everything */
 		p.insertBefore(t, p.firstChild);
-		mOffset += 1;
+		G.mOffset += 1;
 	} else {
-		reveal_around(row, col);
+		G.shape.applyAroundNode(reveal_node, null, el);
 	}
 
-	if (sInt && ++revealed == (rows*cols - bombTotal)) {
-		var dur = Date.now() - start;
+	if (G.sInt && ++G.revealed == (G.rows*G.cols - G.bombTotal)) {
+		var dur = Date.now() - G.start;
 		end_game();
 		alert("Winnar!\n"+(0.001*dur).toFixed(2)+" secs");
 	}
 }
 
-function reveal_around(row, col) {
-	if ((row+col) & 1) {
-		/* pointing down */
-		click_helper(get_node(row + 1, col - 1));
-		click_helper(get_node(row + 1, col    ));
-		click_helper(get_node(row + 1, col + 1));
-
-		click_helper(get_node(row    , col - 2));
-		click_helper(get_node(row    , col - 1));
-		click_helper(get_node(row    , col + 1));
-		click_helper(get_node(row    , col + 2));
-
-		click_helper(get_node(row - 1, col - 2));
-		click_helper(get_node(row - 1, col - 1));
-		click_helper(get_node(row - 1, col    ));
-		click_helper(get_node(row - 1, col + 1));
-		click_helper(get_node(row - 1, col + 2));
-	} else {
-		/* pointing up */
-		click_helper(get_node(row - 1, col - 1));
-		click_helper(get_node(row - 1, col    ));
-		click_helper(get_node(row - 1, col + 1));
-
-		click_helper(get_node(row    , col - 2));
-		click_helper(get_node(row    , col - 1));
-		click_helper(get_node(row    , col + 1));
-		click_helper(get_node(row    , col + 2));
-
-		click_helper(get_node(row + 1, col - 2));
-		click_helper(get_node(row + 1, col - 1));
-		click_helper(get_node(row + 1, col    ));
-		click_helper(get_node(row + 1, col + 1));
-		click_helper(get_node(row + 1, col + 2));
-	}
-}
-
-function new_tri(row, col) {
-	var pstr;
-	var xo = 0.5*col;
-	var yo = row + 0.05;
-
-	if ((row + col) & 1) {
-		pstr = (xo+0.0)+','+(yo+0.0)+' '+(xo+1.0)+','+(yo+0.0)+' '+(xo+0.5)+','+(yo+1.0);
-	} else {
-		pstr = (xo+0.0)+','+(yo+1.0)+' '+(xo+0.5)+','+(yo+0.0)+' '+(xo+1.0)+','+(yo+1.0);
-	}
-
+function new_poly(row, col) {
+	var pstr = G.shape.ptsStr(row, col);
 	var p = document.createElementNS(svgns, 'polygon');
 	p.setAttribute('points', pstr);
-	p.setAttribute('style', p_unclicked);
+	p.setAttribute('style', gs.unclicked);
 	p.clickable = true;
 	p.bomb = 0;
 	p.row = row;
@@ -209,139 +373,105 @@ function new_tri(row, col) {
 	return p;
 }
 
-function bomb_helper(row, col) {
-	var n = get_node(row, col)
-	if (n && n.bomb) {
+function isBomb(node) {
+	if (node && node.bomb) {
 		return 1;
 	} else {
 		return 0;
 	}
 }
 
+function isFlagged(node) {
+	if (node && node.flagged) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+function sum(a,b) { return a+b; }
+
 function build_board() {
 
-	if (sInt) { clearInterval(sInt); } 
+	if (G && G.sInt) { end_game(); }
 
-	rows = parseInt(document.getElementById('rowCount').value);
-	cols = parseInt(document.getElementById('colCount').value);
-	bombTotal = parseInt(document.getElementById('bombCount').value);
+	G = {};
+	G.shape = shapes[document.getElementById('shapeType').value];
+	G.rows = parseInt(document.getElementById('rowCount').value);
+	G.cols = parseInt(document.getElementById('colCount').value);
+	G.bombTotal = parseInt(document.getElementById('bombCount').value);
 
-	if (isNaN(rows) || rows < 1 || rows > 100) {
-		alert("Bad row count: "+rows);
+	if (isNaN(G.rows) || G.rows < 1 || G.rows > 100) {
+		alert("Bad row count: "+G.rows);
 		return;
 	}
 
-	if (isNaN(cols) || cols < 1 || cols > 100) {
-		alert("Bad col count: "+cols);
+	if (isNaN(G.cols) || G.cols < 1 || G.cols > 100) {
+		alert("Bad col count: "+G.cols);
 		return;
 	}
 
-	if (isNaN(bombTotal) || rows * cols < 2 * bombTotal) {
+	if (isNaN(G.bombTotal) || G.rows * G.cols < 2 * G.bombTotal) {
 		alert("Too many bombs!");
 		return;
 	}
 
-	bombMarked = 0;
-	revealed = 0;
-	mOffset = 0;
+	G.bombMarked = 0;
+	G.revealed = 0;
+	G.mOffset = 0;
 
-	var brd = document.getElementById('theboard');
-	sbTime = document.getElementById('thetime');
-	sbScore = document.getElementById('thescore');
-	brd.innerHTML = '';
-	sbTime.innerHTML = '';
-	sbScore.innerHTML = '';
-	msvg = document.createElementNS(svgns, 'svg');
+	G.board = document.getElementById('theboard');
+	G.sbTime = document.getElementById('thetime');
+	G.sbScore = document.getElementById('thescore');
+	G.board.innerHTML = '';
+	G.sbTime.innerHTML = '';
+	G.sbScore.innerHTML = '';
+	G.msvg = document.createElementNS(svgns, 'svg');
 
-	msvg.setAttribute('version', '1.1');
-	msvg.setAttribute('viewBox', '0 0 ' + 0.5*(cols+1) + ' ' + (rows+0.1));
+	G.msvg.setAttribute('version', '1.1');
+	G.msvg.setAttribute('viewBox', G.shape.viewBoxFor(G.rows, G.cols));
 
 	/* build SVG base */
-	for (var i = 0; i < rows; i++) {
-		for (var j = 0; j < cols; j++) {
-			msvg.appendChild(new_tri(i, j));
+	for (var i = 0; i < G.rows; i++) {
+		for (var j = 0; j < G.cols; j++) {
+			G.msvg.appendChild(new_poly(i, j));
 		}
 	}
 
 	/* set up the bombs */
-	for (var b = 0; b < bombTotal; b++) {
-		var row, col;
-		var n = {bomb: true};
-		while (n.bomb) {
-			row = Math.floor(Math.random()*rows);
-			col = Math.floor(Math.random()*cols);
-			n = get_node(row, col);
-		}
-		n.bomb = 1;
-	}
-
-	/* mark all the nodes */
-	for (var i = 0; i < rows; i++) {
-	for (var j = 0; j < cols; j++) {
-		var n = get_node(i, j);
-		if (n.bomb) { continue; }
-
-		if ((i+j) & 1) {
-			/* pointing down */
-			n.count = 0
-			+ bomb_helper(i + 1, j - 1)
-			+ bomb_helper(i + 1, j    )
-			+ bomb_helper(i + 1, j + 1)
-
-			+ bomb_helper(i    , j - 2)
-			+ bomb_helper(i    , j - 1)
-			+ bomb_helper(i    , j + 1)
-			+ bomb_helper(i    , j + 2)
-
-			+ bomb_helper(i - 1, j - 2)
-			+ bomb_helper(i - 1, j - 1)
-			+ bomb_helper(i - 1, j    )
-			+ bomb_helper(i - 1, j + 1)
-			+ bomb_helper(i - 1, j + 2);
-		} else {
-			/* pointing up */
-			n.count = 0
-			+ bomb_helper(i - 1, j - 1)
-			+ bomb_helper(i - 1, j    )
-			+ bomb_helper(i - 1, j + 1)
-
-			+ bomb_helper(i    , j - 2)
-			+ bomb_helper(i    , j - 1)
-			+ bomb_helper(i    , j + 1)
-			+ bomb_helper(i    , j + 2)
-
-			+ bomb_helper(i + 1, j - 2)
-			+ bomb_helper(i + 1, j - 1)
-			+ bomb_helper(i + 1, j    )
-			+ bomb_helper(i + 1, j + 1)
-			+ bomb_helper(i + 1, j + 2);
-		}
-	}
+	for (var b = 0; b < G.bombTotal; b++) {
+		set_random_bomb();
 	}
 
 	document.getElementById('thebutton').textContent = 'Restart';
-	window.onresize = update_size;
-	msvg.onclick = brd_click;
-	msvg.oncontextmenu = function(ev){ return brd_click(ev); };
 
-	brd.appendChild(msvg);
-	start = Date.now();
+	window.onresize = update_size;
+	G.msvg.onmouseup = brd_click;
+	G.msvg.oncontextmenu = function(ev){ return false; }; //brd_click(ev); };
+
+	G.board.appendChild(G.msvg);
 	update_size();
 	update_score();
 	update_time();
-	sInt = setInterval(update_time, 500);
-
+	G.sInt = setInterval(update_time, 500);
+	G.start = Date.now();
 }
 
 </script>
 </head>
 <body onload='build_board()'>
 
-<h1>Trisweeper</h1>
+<h1>Polysweeper</h1>
 
 <div id='thetime'></div>
 <div id='thescore'></div>
 <div id='theboard'></div>
+<label for='shapeType'>Shape</label>
+<select name='shapeType' id='shapeType' value='Hex'>
+  <option value='Hex'>Hexagon</option>
+  <option value='Sqr'>Square</option>
+  <option value='Tri'>Triangle</option>
+</select>
 <label for='bombCount'>Bombs</label>
 <input type='text' name='bombCount' id='bombCount' value=49>
 <label for='rowCount'>Rows</label>
