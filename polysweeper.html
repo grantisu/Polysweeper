@@ -67,45 +67,35 @@ Hex: {
 	},
 
 	fitText: function (tNode, row, col) {
-		tNode.setAttribute('x', 0.55 + 0.75*col);
+		tNode.setAttribute('x', 0.4 + 0.75*col);
 		tNode.setAttribute('y', 1.15 + this.uH*(row - 0.5*(col & 1)));
 	},
 
-	applyAroundNode: function (fMap, fReduce, node) {
-		var rArr = [];
-		var row = node.row;
-		var col = node.col;
-		
-		if (!fReduce) {
-			fReduce = function(a, b) { return a && b; };
-		}
-
+	getAdjacency: function (row, col) {
 		if (col & 1) {
 			/* shifted up */
-			rArr = [
-				fMap(get_node(row - 1, col - 1)),
-				fMap(get_node(row    , col - 1)),
+			return [
+				[row - 1, col - 1],
+				[row    , col - 1],
 
-				fMap(get_node(row - 1, col    )),
-				fMap(get_node(row + 1, col    )),
+				[row - 1, col    ],
+				[row + 1, col    ],
 
-				fMap(get_node(row    , col + 1)),
-				fMap(get_node(row - 1, col + 1)),
+				[row    , col + 1],
+				[row - 1, col + 1]
 			];
 		} else {
-			rArr = [
-				fMap(get_node(row + 1, col - 1)),
-				fMap(get_node(row    , col - 1)),
+			return [
+				[row + 1, col - 1],
+				[row    , col - 1],
 
-				fMap(get_node(row - 1, col    )),
-				fMap(get_node(row + 1, col    )),
+				[row - 1, col    ],
+				[row + 1, col    ],
 
-				fMap(get_node(row    , col + 1)),
-				fMap(get_node(row + 1, col + 1)),
+				[row    , col + 1],
+				[row + 1, col + 1]
 			];
 		}
-
-		return rArr.reduce(fReduce);
 	},
 },
 
@@ -127,29 +117,20 @@ Sqr: {
 		tNode.setAttribute('y', row + 0.65);
 	},
 
-	applyAroundNode: function (fMap, fReduce, node) {
-		var rArr = [];
-		var row = node.row;
-		var col = node.col;
-		
-		if (!fReduce) {
-			fReduce = function(a, b) { return a && b; };
-		}
+	getAdjacency: function (row, col) {
+		return [
+			[row - 1, col - 1],
+			[row - 1, col    ],
+			[row - 1, col + 1],
 
-		rArr = [
-			fMap(get_node(row - 1, col - 1)),
-			fMap(get_node(row - 1, col    )),
-			fMap(get_node(row - 1, col + 1)),
+			[row    , col - 1],
+			[row    , col + 1],
 
-			fMap(get_node(row    , col - 1)),
-			fMap(get_node(row    , col + 1)),
-
-			fMap(get_node(row + 1, col - 1)),
-			fMap(get_node(row + 1, col    )),
-			fMap(get_node(row + 1, col + 1)),
+			[row + 1, col - 1],
+			[row + 1, col    ],
+			[row + 1, col + 1],
 		];
 
-		return rArr.reduce(fReduce);
 	},
 
 },
@@ -178,199 +159,294 @@ Tri: {
 		tNode.setAttribute('y', row + 0.8 - 0.3*((row+col) & 1));
 	},
 
-	applyAroundNode: function (fMap, fReduce, node) {
-		var rArr = [];
-		var row = node.row;
-		var col = node.col;
-		
-		if (!fReduce) {
-			fReduce = function(a, b) { return a && b; };
-		}
-
+	getAdjacency: function (row, col) {
 		if ((row+col) & 1) {
 			/* pointing down */
-			rArr = [
-				fMap(get_node(row + 1, col - 1)),
-				fMap(get_node(row + 1, col    )),
-				fMap(get_node(row + 1, col + 1)),
+			return [
+				[row + 1, col - 1],
+				[row + 1, col    ],
+				[row + 1, col + 1],
 
-				fMap(get_node(row    , col - 2)),
-				fMap(get_node(row    , col - 1)),
-				fMap(get_node(row    , col + 1)),
-				fMap(get_node(row    , col + 2)),
+				[row    , col - 2],
+				[row    , col - 1],
+				[row    , col + 1],
+				[row    , col + 2],
 
-				fMap(get_node(row - 1, col - 2)),
-				fMap(get_node(row - 1, col - 1)),
-				fMap(get_node(row - 1, col    )),
-				fMap(get_node(row - 1, col + 1)),
-				fMap(get_node(row - 1, col + 2))
+				[row - 1, col - 2],
+				[row - 1, col - 1],
+				[row - 1, col    ],
+				[row - 1, col + 1],
+				[row - 1, col + 2]
 			];
 		} else {
 			/* pointing up */
-			rArr = [
-				fMap(get_node(row - 1, col - 1)),
-				fMap(get_node(row - 1, col    )),
-				fMap(get_node(row - 1, col + 1)),
+			return [
+				[row - 1, col - 1],
+				[row - 1, col    ],
+				[row - 1, col + 1],
 
-				fMap(get_node(row    , col - 2)),
-				fMap(get_node(row    , col - 1)),
-				fMap(get_node(row    , col + 1)),
-				fMap(get_node(row    , col + 2)),
+				[row    , col - 2],
+				[row    , col - 1],
+				[row    , col + 1],
+				[row    , col + 2],
 
-				fMap(get_node(row + 1, col - 2)),
-				fMap(get_node(row + 1, col - 1)),
-				fMap(get_node(row + 1, col    )),
-				fMap(get_node(row + 1, col + 1)),
-				fMap(get_node(row + 1, col + 2))
+				[row + 1, col - 2],
+				[row + 1, col - 1],
+				[row + 1, col    ],
+				[row + 1, col + 1],
+				[row + 1, col + 2]
 			];
 		}
 
-		return rArr.reduce(fReduce);
 	},
 },
 
 };
 
-function get_node(row, col) {
-	if (row >= 0 && col >= 0 && row < G.rows && col < G.cols) {
-		var idx = G.mOffset + row*G.cols + col;
-		return G.msvg.childNodes[idx];
+function Game(shape, rows, cols, bombs, board, sbTime, sbScore) {
+	this.shape   = shape;
+	this.rows    = rows;
+	this.cols    = cols;
+	this.bombs   = bombs;
+	this.board   = board;
+	this.sbTime  = sbTime;
+	this.sbScore = sbScore;
+
+	if (isNaN(this.rows) || this.rows < 1 || this.rows > 100) {
+		alert("Bad row count: "+this.rows);
+		return null;
+	}
+
+	if (isNaN(this.cols) || this.cols < 1 || this.cols > 100) {
+		alert("Bad col count: "+this.cols);
+		return null;
+	}
+
+	if (isNaN(this.bombs) || this.rows * this.cols < 2 * this.bombs) {
+		alert("Too many bombs!");
+		return null;
+	}
+
+	this.bombMarked = 0;
+	this.revealedCount = 0;
+	this.mOffset = 0;
+	this.nodesToReveal = [];
+	this.nodesRevealed = {};
+
+	this.board.innerHTML = '';
+	this.sbTime.innerHTML = '';
+	this.sbScore.innerHTML = '';
+
+	this.msvg = document.createElementNS(svgns, 'svg');
+	this.msvg.setAttribute('version', '1.1');
+	this.msvg.setAttribute('viewBox', this.shape.viewBoxFor(this.rows, this.cols));
+
+	for (var i = 0; i < this.rows; i++) {
+		for (var j = 0; j < this.cols; j++) {
+			this.msvg.appendChild(this.makePolyAt(i, j));
+		}
+	}
+
+	for (var b = 0; b < this.bombs; b++) {
+		this.addRandomBomb();
+	}
+}
+
+Game.prototype.getNodeAt = function (row, col) {
+	if (row >= 0 && col >= 0 && row < this.rows && col < this.cols) {
+		var idx = this.mOffset + row*this.cols + col;
+		return this.msvg.childNodes[idx];
 	} else {
 		return undefined;
 	}
+};
+
+Game.prototype.mapAround = function (fMap, node) {
+	if (!fMap) {
+		fMap = function (a) { return a; };
+	}
+	
+	var self = this;
+	var f = function (a) {
+		return fMap(self.getNodeAt(a[0], a[1]));
+	};
+
+	var adj = this.shape.getAdjacency(node.row, node.col);
+	return adj.map(f);
+};
+
+function mPA_getp(pstr) {
+	var p = document.createElementNS(svgns, 'polygon');
+	return p;
 }
 
-/* ##### */
-
-function update_time() {
-	var dur = G.start ? Math.floor((Date.now() - G.start ) / 1000) : 0;
-	G.sbTime.textContent = 'Time ' + dur;
+function mPA_setp(p, pstr, r, c) {
+	p.setAttribute('points', pstr);
+	p.setAttribute('style', gs.unclicked);
+	p.clickable = true;
+	p.bomb = 0;
+	p.row = r;
+	p.col = c;
 }
 
-function update_score() {
-	G.sbScore.textContent = 'UXB ' + (G.bombTotal - G.bombMarked);
-}
+Game.prototype.makePolyAt = function (row, col) {
+	var pstr = this.shape.ptsStr(row, col);
+	/*
+	var p = document.createElementNS(svgns, 'polygon');
+	p.setAttribute('points', pstr);
+	p.setAttribute('style', gs.unclicked);
+	*/
+	
+	/*
+	p.clickable = true;
+	p.bomb = 0;
+	p.row = row;
+	p.col = col;
+	*/
+	var p = mPA_getp(pstr);
+	mPA_setp(p, pstr, row, col);
 
-function update_size(ev) {
-	var mH = 0.80*window.innerHeight;
-	document.getElementById('theboard').firstChild.style.maxHeight = mH+'px';
-}
+	return p;
+};
 
-/* ##### */
-
-function incCount(n) { if (n) { n.count = (n.count || 0) + 1; } }
-
-function set_random_bomb() {
+Game.prototype.addRandomBomb = function () {
 	var row, col;
 	var n = {bomb: true};
 	while (!n || n.bomb) {
-		row = Math.floor(Math.random()*G.rows);
-		col = Math.floor(Math.random()*G.cols);
-		n = get_node(row, col);
+		row = Math.floor(Math.random()*this.rows);
+		col = Math.floor(Math.random()*this.cols);
+		n = this.getNodeAt(row, col);
 	}
 	n.bomb = 1;
 
-	G.shape.applyAroundNode(incCount, null, n);
+	var incCount = function (n) { if (n) { n.count = (n.count || 0) + 1; } };
+	this.mapAround(incCount, n);
 };
 
-function end_game() {
-	clearInterval(G.sInt);
-	G.sInt = undefined;
-	G.msvg.onmouseup = undefined;
-	G.msvg.oncontextmenu = undefined;
-}
+Game.prototype.updateTime = function () {
+	var dur = this.start ? Math.floor((Date.now() - this.start ) / 1000) : 0;
+	this.sbTime.textContent = 'Time ' + dur;
+};
 
-function brd_click(ev) {
+Game.prototype.updateScore = function () {
+	this.sbScore.textContent = 'UXB ' + (this.bombs - this.bombMarked);
+};
+
+Game.prototype.updateSize = function (ev) {
+	var mH = 0.80*window.innerHeight;
+	document.getElementById('theboard').firstChild.style.maxHeight = mH+'px';
+};
+
+Game.prototype.end = function () {
+	clearInterval(this.sInt);
+	this.sInt = undefined;
+	this.msvg.onmouseup = undefined;
+	this.msvg.oncontextmenu = undefined;
+};
+
+Game.prototype.boardClick = function (ev) {
 	var el = ev.target;
 
 	try{
 		if (ev.button == 0) {
-			reveal_node(el);
+			this.revealNode(el);
 		} else if (el.clickable && ev.button == 2) {
 			if (el.flagged) {
 				el.flagged = false;
 				el.setAttribute('style', gs.unclicked);
-				G.bombMarked -= 1;
+				this.bombMarked -= 1;
 			} else {
 				el.flagged = true;
 				el.setAttribute('style', gs.flagged);
-				G.bombMarked += 1;
+				this.bombMarked += 1;
 			}
 		} else if (
 		  !el.clickable &&
 		  ev.button == 2 &&
 		  el.count &&
-		  G.shape.applyAroundNode(isFlagged, sum, el) == el.count
+		  this.mapAround(isFlagged, el).reduce(sum) == el.count
 		) {
-			G.shape.applyAroundNode(reveal_node, null, el);
+			this.mapAround(this.revealNode.bind(this), el);
 		}
 
-		update_score();
+		this.updateScore();
 
 	} catch (err) {
 		alert(err);
-		end_game();
+		this.end();
 	}
 	return false;
-}
+};
 
-function reveal_node(el) {
-	if (!(el && (el.clickable && !el.flagged))) { return; }
-	el.clickable = false;
-	
-	var row = el.row;
-	var col = el.col;
-	el.setAttribute('style', gs.clicked);
+Game.prototype.revealNode = function (el) {
+	this.nodesToReveal.push(el);
+	return this.revealNodeHelper();
+};
 
-	if (el.bomb) {
-		if (G.revealed == 0) {
-			/* First click; take pity */
-			set_random_bomb();
-			el.bomb = undefined;
-			G.shape.applyAroundNode(function (n) { if (n) {--n.count;} },null,el);
-		} else {
-			el.setAttribute('style', gs.bomb);
-			if (G.sInt) { end_game(); }
-			for (var j = 0; j < G.cols; j++) {
-			for (var i = 0; i < G.rows; i++) {
-				reveal_node(get_node(i, j));
+Game.prototype.checkReveal = function (n) {
+	var k = n ? n.row+':'+n.col : '0';
+	var r = (n && n.clickable && !this.nodesRevealed[k]);
+	this.nodesRevealed[k] = true;
+	return r; 
+};
+
+Game.prototype.revealNodeHelper = function () {
+	var visits = 0;
+	while(this.nodesToReveal.length > 0) {
+//console.log(this.nodesToReveal);
+visits += 1;
+		var el = this.nodesToReveal.pop();
+
+		if (!(el && (el.clickable && !el.flagged))) { continue; }
+		el.clickable = false;
+		var row = el.row;
+		var col = el.col;
+		el.setAttribute('style', gs.clicked);
+
+		if (el.bomb) {
+			if (this.revealedCount == 0) {
+				/* First click; take pity by moving the bomb elsewhere*/
+				this.addRandomBomb();
+				el.bomb = undefined;
+				var decCount = function (n) { if (n) {--n.count;} };
+				this.mapAround(decCount,el);
+			} else {
+				el.setAttribute('style', gs.bomb);
+				if (this.sInt) {
+					this.end();
+					for (var j = 0; j < this.cols; j++) {
+						for (var i = 0; i < this.rows; i++) {
+							this.nodesToReveal.push(this.getNodeAt(i, j));
+						}
+					}
+				}
 			}
-			}
-			return false;
+		}
+		
+		if (el.count) {
+			var p = el.parentNode;
+			var t = document.createElementNS(svgns, 'text');
+			t.textContent = el.count;
+			this.shape.fitText(t, row, col);
+			t.setAttribute('style', gs.text + 'fill:' + (gs.color[el.count] || '#000')+';');
+			/* make sure text appears beneath everything */
+			p.insertBefore(t, p.firstChild);
+			this.mOffset += 1;
+		} else if (this.sInt) {
+			var mNode = this.mapAround(null, el).filter(this.checkReveal.bind(this));
+			this.nodesToReveal = this.nodesToReveal.concat(mNode);
+		}
+
+		if (this.sInt && ++this.revealedCount == (this.rows*this.cols - this.bombs)) {
+			var dur = Date.now() - this.start;
+			this.end();
+			//alert("Winnar!\n"+(0.001*dur).toFixed(2)+" secs");
 		}
 	}
-	
-	if (el.count) {
-		var p = el.parentNode;
-		var t = document.createElementNS(svgns, 'text');
-		t.textContent = el.count;
-		G.shape.fitText(t, row, col);
-		t.setAttribute('style', gs.text + 'fill:' + (gs.color[el.count] || '#000')+';');
-		/* make sure text appears beneath everything */
-		p.insertBefore(t, p.firstChild);
-		G.mOffset += 1;
-	} else {
-		G.shape.applyAroundNode(reveal_node, null, el);
-	}
+//console.log(visits);
 
-	if (G.sInt && ++G.revealed == (G.rows*G.cols - G.bombTotal)) {
-		var dur = Date.now() - G.start;
-		end_game();
-		alert("Winnar!\n"+(0.001*dur).toFixed(2)+" secs");
-	}
-}
 
-function new_poly(row, col) {
-	var pstr = G.shape.ptsStr(row, col);
-	var p = document.createElementNS(svgns, 'polygon');
-	p.setAttribute('points', pstr);
-	p.setAttribute('style', gs.unclicked);
-	p.clickable = true;
-	p.bomb = 0;
-	p.row = row;
-	p.col = col;
-
-	return p;
+	return false;
 }
 
 function isBomb(node) {
@@ -391,75 +467,44 @@ function isFlagged(node) {
 
 function sum(a,b) { return a+b; }
 
-function build_board() {
+function buildBoard() {
 
-	if (G && G.sInt) { end_game(); }
+	var bStart = Date.now();
 
-	G = {};
-	G.shape = shapes[document.getElementById('shapeType').value];
-	G.rows = parseInt(document.getElementById('rowCount').value);
-	G.cols = parseInt(document.getElementById('colCount').value);
-	G.bombTotal = parseInt(document.getElementById('bombCount').value);
+	if (G && G.sInt) { G.end(); }
 
-	if (isNaN(G.rows) || G.rows < 1 || G.rows > 100) {
-		alert("Bad row count: "+G.rows);
-		return;
-	}
+	G = new Game(
+		shapes[document.getElementById('shapeType').value],
+		parseInt(document.getElementById('rowCount').value),
+		parseInt(document.getElementById('colCount').value),
+		parseInt(document.getElementById('bombCount').value),
+		document.getElementById('theboard'),
+		document.getElementById('thetime'),
+		document.getElementById('thescore')
+	);
 
-	if (isNaN(G.cols) || G.cols < 1 || G.cols > 100) {
-		alert("Bad col count: "+G.cols);
-		return;
-	}
-
-	if (isNaN(G.bombTotal) || G.rows * G.cols < 2 * G.bombTotal) {
-		alert("Too many bombs!");
-		return;
-	}
-
-	G.bombMarked = 0;
-	G.revealed = 0;
-	G.mOffset = 0;
-
-	G.board = document.getElementById('theboard');
-	G.sbTime = document.getElementById('thetime');
-	G.sbScore = document.getElementById('thescore');
-	G.board.innerHTML = '';
-	G.sbTime.innerHTML = '';
-	G.sbScore.innerHTML = '';
-	G.msvg = document.createElementNS(svgns, 'svg');
-
-	G.msvg.setAttribute('version', '1.1');
-	G.msvg.setAttribute('viewBox', G.shape.viewBoxFor(G.rows, G.cols));
-
-	/* build SVG base */
-	for (var i = 0; i < G.rows; i++) {
-		for (var j = 0; j < G.cols; j++) {
-			G.msvg.appendChild(new_poly(i, j));
-		}
-	}
-
-	/* set up the bombs */
-	for (var b = 0; b < G.bombTotal; b++) {
-		set_random_bomb();
-	}
 
 	document.getElementById('thebutton').textContent = 'Restart';
 
-	window.onresize = update_size;
-	G.msvg.onmouseup = brd_click;
-	G.msvg.oncontextmenu = function(ev){ return false; }; //brd_click(ev); };
+	window.onresize = G.updateSize.bind(G);
+	G.msvg.onmouseup = G.boardClick.bind(G);
+	G.msvg.oncontextmenu = function (ev) { return false; };
 
 	G.board.appendChild(G.msvg);
-	update_size();
-	update_score();
-	update_time();
-	G.sInt = setInterval(update_time, 500);
+	G.updateSize();
+	G.updateScore();
+	G.updateTime();
+	G.sInt = setInterval(G.updateTime.bind(G), 500);
 	G.start = Date.now();
+
+	bEnd = Date.now();
+
+	console.log('Board built in '+(bEnd-bStart)+' msec');
 }
 
 </script>
 </head>
-<body onload='build_board()'>
+<body onload='buildBoard()'>
 
 <h1>Polysweeper</h1>
 
@@ -478,7 +523,7 @@ function build_board() {
 <input type='text' name='rowCount' id='rowCount' value=16>
 <label for='colCount'>Cols</label>
 <input type='text' name='colCount' id='colCount' value=30>
-<button id='thebutton' type='button' onclick='build_board()'>Start</button>
+<button id='thebutton' type='button' onclick='buildBoard()'>Start</button>
 
 </body>
 </html>
