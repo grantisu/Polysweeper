@@ -13,6 +13,12 @@ body {
 	padding: 0;
 }
 
+svg {
+	width: 98%;
+	margin: auto;
+	display: block;
+}
+
 ul { list-style: none; }
 
 li { display: inline-block; }
@@ -37,7 +43,8 @@ select {
 }
 
 #theBoard {
-	margin: auto;
+	padding: 0;
+	margin: 0 auto;
 }
 
 #theButton {
@@ -118,7 +125,7 @@ Hex: {
 	uPts: '0.5,0.0 0.25,0.433012701892 -0.25,0.433012701892 -0.5,0.0 -0.25,-0.433012701892 0.25,-0.433012701892',
 
 	viewBoxFor: function (rows, cols) {
-		return '0 0 ' + (0.75*cols + 0.5) + ' ' + (this.uH*rows + 0.7);
+		return '0 0 ' + (0.75*cols + 0.5) + ' ' + (this.uH*rows + 0.75);
 	},
 
 	getRotation: function (row, col) {
@@ -126,7 +133,7 @@ Hex: {
 	},
 
 	getOffset: function (row, col) {
-		var xo = 0.55 + 0.75*col;
+		var xo = 0.625 + 0.75*col;
 		var yo = 1.05 + this.uH*row;
 
 		if (col & 1) { yo -= 0.5*this.uH; }
@@ -169,7 +176,7 @@ Pen: {
 	uPts: '0.0,0.683012701892 0.866025403784,0.183012701892 0.366025403784,-0.683012701892 -0.366025403784,-0.683012701892 -0.866025403784,0.183012701892',
 
 	viewBoxFor: function (rows, cols) {
-		return '0 0 '+0.8660254037845*(cols+1.2)+' '+this.uW*(rows+0.7);
+		return '0 0 '+0.8660254037845*(cols+1.25)+' '+this.uW*(rows+0.7);
 	},
 
 	getRotation: function (row, col) {
@@ -185,7 +192,7 @@ Pen: {
 	},
 
 	getOffset: function (row, col) {
-		var xo = 1.2 - 0.366025403784*(row&1) + 0.683012701892*col;
+		var xo = 1.125 - 0.366025403784*(row&1) + 0.683012701892*col;
 		var yo = this.uW*(row + 1.1);
 
 		if (row & 1) {
@@ -347,7 +354,7 @@ Rho: {
 	uPts: '-0.649519052838329,0 0.0,-0.375 0.649519052838329,0.0 0.0,0.375',
 
 	viewBoxFor: function (rows, cols) {
-		return '0 0 ' + (1.3*Math.floor((cols+2)/3)+.75) + ' ' + (1.125*rows+0.7);
+		return '0 0 ' + (this.uW*Math.floor((cols+2)/3)+0.75) + ' ' + (1.125*rows+0.7);
 	},
 
 	getRotation: function (row, col) {
@@ -355,10 +362,10 @@ Rho: {
 	},
 
 	getOffset: function (row, col) {
-		var xo = 0.4 + 0.25*this.uW*col;
+		var xo = 0.375 + 0.25*this.uW*(col + Math.floor(col / 3));
 		var yo = 1.1 + 1.125*row;
 
-		xo += 0.25*this.uW*(Math.floor(col / 3) + 2*(row & 1));
+		xo += 0.5*this.uW*(row & 1);
 		yo -= ((col % 3) == 1 ? 0.5625 : 0);
 
 		return [xo, yo];
@@ -423,7 +430,7 @@ Tri: {
 	uPts: '0.433012701892,-0.25 0.0,0.5 -0.433012701892,-0.25',
 
 	viewBoxFor: function (rows, cols) {
-		return '0 0 '+(0.5*this.uW*cols+0.6)+' '+(this.uH*rows+0.2);
+		return '0 0 '+(0.5*this.uW*cols+0.5)+' '+(this.uH*rows+0.25);
 	},
 
 	getRotation: function (row, col) {
@@ -431,8 +438,8 @@ Tri: {
 	},
 
 	getOffset: function (row, col) {
-		var xo = 0.5*this.uW*col + 0.5;
-		var yo = this.uH*row + 0.5;
+		var xo = 0.5*this.uW*col + 0.475;
+		var yo = this.uH*row + 0.625;
 
 		if ((row + col) & 1) {
 			yo -= 0.333333333*this.uH;
@@ -786,7 +793,7 @@ Game.prototype.revealNodeHelper = function () {
 Game.prototype.initSVG = function () {
 	var divHack = document.createElement('div');
 	divHack.innerHTML = "" + 
-"<svg version='1.1' viewBox='"+this.shape.viewBoxFor(this.rows, this.cols)+"' preserveAspectRatio='xMinYMin meet'>" + 
+"<svg version='1.1' viewBox='"+this.shape.viewBoxFor(this.rows, this.cols)+"' preserveAspectRatio='xMidYMin meet'>" + 
 	"<link rel='stylesheet' href='#theCSS' type='text/CSS' />" +
 	"<defs>" +
 		"<radialGradient id='grayMesa' fx='0.5' fy='0.5'>" +
