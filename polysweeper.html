@@ -18,14 +18,14 @@ body {
 		Verdana,
 		sans-serif;
 	margin: 0;
-	padding: 0 1em;
+	padding: 0;
 }
 
 svg {
 	min-height: 15em;
 	max-width: 98%;
 	margin: auto;
-	display: block;
+	display: inline-block;
 	box-shadow: 0 0 4em 4.4em #fff;
 	background-color: #fff;
 }
@@ -83,6 +83,14 @@ select {
 	margin: 0.5em auto 2em auto;
 	padding: 0.1em 2em;
 	min-width: 9em;
+}
+
+#outerDiv {
+	vertical-align: top;
+	min-width: 15em;
+	margin: 0;
+	padding: 0;
+	display: inline-block;
 }
 
 /* SVG style */
@@ -698,6 +706,7 @@ Game.prototype.updateSize = function (ev) {
 
 	/* Set svg max-height to 85% of the available space, assuming a 16 pixel em */
 	this.svg.style.maxHeight = 0.0531*(mH-oH)+'em';
+	document.getElementById('outerDiv').style.width = (window.innerWidth - 360)+'px';
 };
 
 Game.prototype.scoreKey = function () {
@@ -933,6 +942,7 @@ function initPage() {
 
 <h1>Polysweeper</h1>
 
+<div id='outerDiv'>
 <ul>
 <li>
 <label for='shapeType'>Shape</label>
@@ -957,6 +967,7 @@ function initPage() {
 <div id='theTime'></div>
 <div id='theCount'></div>
 <button id='hiScore' type='button'>High Scores</button>
+</div>
 
 </body>
 </html>
