@@ -669,7 +669,7 @@ Game.prototype.makePolyAt = function (row, col) {
 
 Game.prototype.addRandomBomb = function () {
 	var row, col;
-	var n = {bomb: true};
+	var n;
 	while (!n || n.bomb) {
 		row = Math.floor(Math.random()*this.rows);
 		col = Math.floor(Math.random()*this.cols);
