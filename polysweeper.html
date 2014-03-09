@@ -22,6 +22,7 @@ body {
 }
 
 svg {
+	min-height: 15em;
 	max-width: 98%;
 	margin: auto;
 	display: block;
@@ -79,7 +80,7 @@ select {
 
 #theCount, #theTime, #hiScore {
 	display: inline-block;
-	margin: auto;
+	margin: 0.5em auto 2em auto;
 	padding: 0.1em 2em;
 	min-width: 9em;
 }
@@ -690,8 +691,13 @@ Game.prototype.updateScore = function () {
 };
 
 Game.prototype.updateSize = function (ev) {
-	var mH = 0.80*window.innerHeight;
-	document.getElementById('theBoard').firstChild.style.maxHeight = mH+'px';
+	var mH = window.innerHeight;
+	var oH = ['h1', 'ul', 'button', 'button'].map(function (tag) {
+		return document.getElementsByTagName(tag)[0].offsetHeight;
+	}).reduce(sum);
+
+	/* Set svg max-height to 85% of the available space, assuming a 16 pixel em */
+	this.svg.style.maxHeight = 0.0531*(mH-oH)+'em';
 };
 
 Game.prototype.scoreKey = function () {
@@ -848,7 +854,7 @@ Game.prototype.initSVG = function () {
 	divHack.innerHTML = [ 
 '<svg version="1.1" viewBox="',
 	this.shape.viewBoxFor(this.rows, this.cols),
-'" preserveAspectRatio="xMidYMin meet">',
+'" preserveAspectRatio="xMidYMid meet">',
 	'<link rel="stylesheet" href="#theCSS" type="text/CSS" />',
 	'<defs>',
 		'<radialGradient id="grayMesa" r="0.75" fx="0.125" fy="0.125">',
