@@ -144,7 +144,14 @@ Hex: {
 	name: 'Hexagon',
 	uW: 1.0,
 	uH: Math.sin(Math.PI / 3.0),
-	uPts: '0.5,0.0 0.25,0.433012701892 -0.25,0.433012701892 -0.5,0.0 -0.25,-0.433012701892 0.25,-0.433012701892',
+	uPts: [
+		[0.5,0.0],
+		[0.25,0.433012701892],
+		[-0.25,0.433012701892],
+		[-0.5,0.0],
+		[-0.25,-0.433012701892],
+		[0.25,-0.433012701892]
+	],
 
 	viewBoxFor: function (rows, cols) {
 		return '0 0 ' + (0.75*cols + 0.5) + ' ' + (this.uH*rows + 0.75);
@@ -195,7 +202,13 @@ Pen: {
 	name: 'Pentagon (Cairo)',
 	uW: 1.7320508075689,
 	uH: 1.3660254037845,
-	uPts: '0.0,0.683012701892 0.866025403784,0.183012701892 0.366025403784,-0.683012701892 -0.366025403784,-0.683012701892 -0.866025403784,0.183012701892',
+	uPts: [
+		[0.0,0.683012701892],
+		[0.866025403784,0.183012701892],
+		[0.366025403784,-0.683012701892],
+		[-0.366025403784,-0.683012701892],
+		[-0.866025403784,0.183012701892]
+	],
 
 	viewBoxFor: function (rows, cols) {
 		return '0 0 '+0.8660254037845*(cols+1.25)+' '+this.uW*(rows+0.7);
@@ -338,7 +351,12 @@ Sqr: {
 	name: 'Square',
 	uW: 1.0,
 	uH: 1.0,
-	uPts: '-0.5,-0.5 0.5,-0.5 0.5,0.5 -0.5,0.5',
+	uPts: [
+		[-0.5,-0.5],
+		[0.5,-0.5],
+		[0.5,0.5],
+		[-0.5,0.5]
+	],
 
 	viewBoxFor: function (rows, cols) {
 		return '0 0 ' + (cols+0.2) + ' ' + (rows+0.2);
@@ -373,7 +391,12 @@ Rho: {
 	name: 'Rhombus',
 	uW: 1.299038105676658,
 	uH: 0.75,
-	uPts: '-0.649519052838329,0 0.0,-0.375 0.649519052838329,0.0 0.0,0.375',
+	uPts: [
+		[-0.649519052838329,0.0],
+		[0.0,-0.375],
+		[0.649519052838329,0.0],
+		[0.0,0.375]
+	],
 
 	viewBoxFor: function (rows, cols) {
 		return '0 0 ' + (this.uW*Math.floor((cols+2)/3)+0.75) + ' ' + (1.125*rows+0.7);
@@ -449,7 +472,11 @@ Tri: {
 	name: 'Triangle',
 	uW: 0.8660254037844386,
 	uH: 0.75,
-	uPts: '0.433012701892,-0.25 0.0,0.5 -0.433012701892,-0.25',
+	uPts: [
+		[0.433012701892,-0.25],
+		[0.0,0.5],
+		[-0.433012701892,-0.25]
+	],
 
 	viewBoxFor: function (rows, cols) {
 		return '0 0 '+(0.5*this.uW*cols+0.5)+' '+(this.uH*rows+0.25);
@@ -619,14 +646,17 @@ Game.prototype.mapAround = function (fMap, node) {
 Game.prototype.makePolyAt = function (row, col) {
 	var shape = this.shape;
 	var off = shape.getOffset(row, col);
+
 	var rot = shape.getRotation(row, col);
+	var cr = Math.cos(Math.PI * rot / 180.0);
+	var sr = Math.sin(Math.PI * rot / 180.0);
+	var pts = shape.uPts.map(function (p) {
+		return (cr*p[0] - sr*p[1])+','+(sr*p[0] + cr*p[1]);
+	}).join(' ');
 
 	var p = document.createElementNS(SVGNS, 'polygon');
-	p.setAttribute('points', shape.uPts);
-	p.setAttribute('transform',
-		'translate('+off[0]+','+off[1]+')' +
-		(rot ? ' rotate('+rot+')' : '')
-	);
+	p.setAttribute('points', pts);
+	p.setAttribute('transform', 'translate('+off[0]+','+off[1]+')');
 	
 	p.clickable = true;
 	p.bomb = 0;
@@ -818,17 +848,17 @@ Game.prototype.initSVG = function () {
 "<svg version='1.1' viewBox='"+this.shape.viewBoxFor(this.rows, this.cols)+"' preserveAspectRatio='xMidYMin meet'>" + 
 	"<link rel='stylesheet' href='#theCSS' type='text/CSS' />" +
 	"<defs>" +
-		"<radialGradient id='grayMesa' fx='0.5' fy='0.5'>" +
+		"<radialGradient id='grayMesa' r='0.75' fx='0.125' fy='0.125'>" +
 			"<stop offset='0%' stop-color='#888888' />" +
 			"<stop offset='50%' stop-color='#777778' />" +
 			"<stop offset='100%' stop-color='#444448' />" +
 		"</radialGradient>" +
-		"<radialGradient id='yellowMesa' fx='0.5' fy='0.5'>" +
+		"<radialGradient id='yellowMesa' r='0.75' fx='0.125' fy='0.125'>" +
 			"<stop offset='0%' stop-color='#e5e589' />" +
 			"<stop offset='50%' stop-color='#cfcf63' />" +
 			"<stop offset='100%' stop-color='#444422' />" +
 		"</radialGradient>" +
-		"<radialGradient id='redMesa' fx='0.5' 'fy=0.5'>" +
+		"<radialGradient id='redMesa' r='0.75' fx='0.5' 'fy=0.5'>" +
 			"<stop offset='0%' stop-color='#f00' />" +
 			"<stop offset='100%' stop-color='#444448' />" +
 		"</linearGradient>" +
