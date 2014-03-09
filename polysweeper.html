@@ -6,17 +6,32 @@
   <style id='theCSS'>
 
 body {
+	background-color: #c0e0f0;
 	font-weight: bold;
 	text-align: center;
-	font-family: "DejaVu Sans", "Bitstream Vera Sans", "Lucida Grande", "Lucida Sans", Corbel, Verdana, sans-serif;
-	margin: 1em;
-	padding: 0;
+	font-family:
+		"DejaVu Sans",
+		"Bitstream Vera Sans",
+		"Lucida Grande",
+		"Lucida Sans",
+		Corbel,
+		Verdana,
+		sans-serif;
+	margin: 0;
+	padding: 0 1em;
 }
 
 svg {
-	width: 98%;
+	max-width: 98%;
 	margin: auto;
 	display: block;
+	box-shadow: 0 0 4em 4.1em #fff;
+	background-color: #fff;
+}
+
+* {	/* box-shadow fix */
+	position: relative;
+	z-index: 1;
 }
 
 ul { list-style: none; }
@@ -25,11 +40,18 @@ li { display: inline-block; }
 
 label { margin-left: 1.75em; }
 
-input,select {
+input, select, button, #theCount, #theTime {
 	background-color: #fff;
 	border: 1px solid #000;
-	box-shadow: 0 0 8px  rgba(0,0,0,0.1), 0 0 16px rgba(0,0,0,0.1);
+	box-shadow: 0 0 0.4em #333;
 }
+
+button {
+	background-color: #dcb;
+	font-weight: bold;
+}
+
+button:active { background-color: #fe8; }
 
 input {
 	text-align: right;
@@ -43,18 +65,18 @@ select {
 }
 
 #theBoard {
+	z-index: 0;
+
 	padding: 0;
 	margin: 0 auto;
 }
 
 #theButton {
-	border: 1px solid #000;
 	display: block;
 	margin: 1em auto;
 }
 
 #theCount, #theTime, #hiScore {
-	border: 1px solid #000;
 	display: inline-block;
 	margin: auto;
 	padding: 0.1em 2em;
@@ -65,7 +87,7 @@ select {
 
 polygon {
 	stroke:#000;
-	stroke-width:0.025;
+	stroke-width:0.02;
 	stroke-linejoin:bevel;
 }
 
@@ -802,7 +824,7 @@ Game.prototype.initSVG = function () {
 			"<stop offset='100%' stop-color='#444448' />" +
 		"</radialGradient>" +
 		"<radialGradient id='yellowMesa' fx='0.5' fy='0.5'>" +
-			"<stop offset='0%' stop-color='#dfdf87' />" +
+			"<stop offset='0%' stop-color='#e5e589' />" +
 			"<stop offset='50%' stop-color='#cfcf63' />" +
 			"<stop offset='100%' stop-color='#444422' />" +
 		"</radialGradient>" +
