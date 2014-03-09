@@ -845,26 +845,28 @@ Game.prototype.revealNodeHelper = function () {
 
 Game.prototype.initSVG = function () {
 	var divHack = document.createElement('div');
-	divHack.innerHTML = "" + 
-"<svg version='1.1' viewBox='"+this.shape.viewBoxFor(this.rows, this.cols)+"' preserveAspectRatio='xMidYMin meet'>" + 
-	"<link rel='stylesheet' href='#theCSS' type='text/CSS' />" +
-	"<defs>" +
-		"<radialGradient id='grayMesa' r='0.75' fx='0.125' fy='0.125'>" +
-			"<stop offset='0%' stop-color='#888888' />" +
-			"<stop offset='50%' stop-color='#777778' />" +
-			"<stop offset='100%' stop-color='#444448' />" +
-		"</radialGradient>" +
-		"<radialGradient id='yellowMesa' r='0.75' fx='0.125' fy='0.125'>" +
-			"<stop offset='0%' stop-color='#e5e589' />" +
-			"<stop offset='50%' stop-color='#cfcf63' />" +
-			"<stop offset='100%' stop-color='#444422' />" +
-		"</radialGradient>" +
-		"<radialGradient id='redMesa' r='0.75' fx='0.5' 'fy=0.5'>" +
-			"<stop offset='0%' stop-color='#f00' />" +
-			"<stop offset='100%' stop-color='#444448' />" +
-		"</linearGradient>" +
-	"</defs>" +
-"</svg>";
+	divHack.innerHTML = [ 
+'<svg version="1.1" viewBox="',
+	this.shape.viewBoxFor(this.rows, this.cols),
+'" preserveAspectRatio="xMidYMin meet">',
+	'<link rel="stylesheet" href="#theCSS" type="text/CSS" />',
+	'<defs>',
+		'<radialGradient id="grayMesa" r="0.75" fx="0.125" fy="0.125">',
+			'<stop offset="0%" stop-color="#888888" />',
+			'<stop offset="50%" stop-color="#777778" />',
+			'<stop offset="100%" stop-color="#444448" />',
+		'</radialGradient>',
+		'<radialGradient id="yellowMesa" r="0.75" fx="0.125" fy="0.125">',
+			'<stop offset="0%" stop-color="#e5e589" />',
+			'<stop offset="50%" stop-color="#cfcf63" />',
+			'<stop offset="100%" stop-color="#444422" />',
+		'</radialGradient>',
+		'<radialGradient id="redMesa" r="0.75" fx="0.5" "fy=0.5">',
+			'<stop offset="0%" stop-color="#f00" />',
+			'<stop offset="100%" stop-color="#444448" />',
+		'</linearGradient>',
+	'</defs>',
+'</svg>'].join('');
 
 	this.pg = document.createElementNS(SVGNS, 'g');
 	this.pg.setAttribute('fill', 'url(#grayMesa)');
