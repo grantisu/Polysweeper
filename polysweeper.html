@@ -973,6 +973,10 @@ Game.prototype.boardClick = function (ev) {
 	var el = ev.target;
 
 	try{
+		if (!this.start) {
+			this.start = Date.now();
+		}
+
 		if (ev.button == 0) {
 			this.revealNode(el);
 		} else if (el.clickable && ev.button == 2) {
@@ -1132,7 +1136,6 @@ function buildBoard() {
 	G.updateScore();
 	G.updateTime();
 	G.sInt = setInterval(G.updateTime.bind(G), 300);
-	G.start = Date.now();
 
 	bEnd = Date.now();
 
