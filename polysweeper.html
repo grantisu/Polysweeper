@@ -1027,7 +1027,13 @@ Game.prototype.addTextFor = function (node) {
 	t.textContent = node.count;
 	t.setAttribute('class', 'ptext');
 	if (node.count < 10) {
-		t.classList.add('ptext' + node.count);
+		if (t.classList) {
+			/* Correct SVG DOM implementation */
+			t.classList.add('ptext' + node.count);
+		} else {
+			/* IE and Non-Chrome WebKit */
+			t.className = t.className + ' ptext' + node.count;
+		}
 	}
 	t.setAttribute('transform', 'translate('+off[0]+','+(off[1]+0.125)+')');
 
