@@ -1149,6 +1149,18 @@ function buildBoard() {
 function initPage() {
 	var st = document.getElementById('shapeType');
 
+	if (!document.createElementNS ||
+	    !document.createElementNS(SVGNS, 'svg').createSVGRect
+	) {
+		alert('ERROR: Your browser does not support SVG.');
+		return null;
+	}
+
+	if (!document.documentElement.classList) {
+		alert('ERROR: Your browser does not support the classList API.')
+		return null;
+	}
+
 	var hs = document.getElementById('hiScore')
 	if (!Storage) {
 		hs.disabled = true;
