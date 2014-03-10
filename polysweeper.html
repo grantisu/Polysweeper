@@ -162,7 +162,7 @@ polygon {
 .ptext8 { fill: #243; }
 .ptext9 { fill: #222; }
 
-.unclicked:hover {
+.unclicked :hover:not(.flagged):not(.bomb) {
 	fill: #fff;
 }
 
@@ -1116,7 +1116,7 @@ Game.prototype.initSVG = function () {
 '</svg>'].join('');
 
 	this.pg = document.createElementNS(SVGNS, 'g');
-	this.pg.setAttribute('fill', 'url(#grayMesa)');
+	this.pg.setAttribute('class', 'unclicked');
 
 	this.svg = divHack.firstChild;
 	this.svg.appendChild(this.pg);
