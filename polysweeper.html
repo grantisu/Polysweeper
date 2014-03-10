@@ -958,7 +958,7 @@ Game.prototype.end = function (score) {
 		var slist = JSON.parse(localStorage.getItem(sk)) || [];
 		var hs = slist.slice(-1)[0];
 		
-		if (!hs || score < hs) {
+		if (!hs || slist.length < this.numScores || score < hs) {
 			slist.push(score);
 			slist.sort(function (a, b) { return a - b; });
 			if (slist.length > this.numScores) {
