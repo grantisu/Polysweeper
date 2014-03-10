@@ -163,7 +163,7 @@ polygon {
 .ptext9 { fill: #222; }
 
 .unclicked :hover:not(.flagged):not(.bomb) {
-	fill: #fff;
+	fill: url(#paleMesa);
 }
 
   </style>
@@ -1100,6 +1100,11 @@ Game.prototype.initSVG = function () {
 	'<defs>',
 		'<radialGradient id="grayMesa" r="0.75" fx="0.125" fy="0.125">',
 			'<stop offset="0%" stop-color="#888888" />',
+			'<stop offset="50%" stop-color="#777778" />',
+			'<stop offset="100%" stop-color="#444448" />',
+		'</radialGradient>',
+		'<radialGradient id="paleMesa" r="0.75" fx="0.333" fy="0.333">',
+			'<stop offset="0%" stop-color="#f8f8f8" />',
 			'<stop offset="50%" stop-color="#777778" />',
 			'<stop offset="100%" stop-color="#444448" />',
 		'</radialGradient>',
