@@ -933,13 +933,17 @@ Game.prototype.scoreKey = function () {
 
 Game.prototype.showHiScore = function (msg) {
 	var scoreStr = msg ? msg+"\n\n" : '';
-	var slist = localStorage.getItem(this.scoreKey());
+	if (!!Storage) {
+		var slist = localStorage.getItem(this.scoreKey());
 
-	if (slist) {
-		slist = JSON.parse(slist);
-		scoreStr += "High Scores:\n"+slist.join("\n");
+		if (slist) {
+			slist = JSON.parse(slist);
+			scoreStr += "High Scores:\n"+slist.join("\n");
+		} else {
+			scoreStr += "No high scores yet!";
+		}
 	} else {
-		scoreStr += "No high scores yet!";
+		scoreStr += "ERR: your browser does not support local storage.";
 	}
 
 	alert(scoreStr);
@@ -1144,6 +1148,13 @@ function buildBoard() {
 
 function initPage() {
 	var st = document.getElementById('shapeType');
+
+	var hs = document.getElementById('hiScore')
+	if (!Storage) {
+		hs.disabled = true;
+	} else {
+		hs.disabled = false;
+	}
 
 	for (var s in shapes) {
 		var o = document.createElement('option');
