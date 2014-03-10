@@ -174,20 +174,21 @@ polygon {
 var SVGNS = "http://www.w3.org/2000/svg";
 var XLINKNS = "http://www.w3.org/1999/xlink";
 var G;
+var sqrt3 = Math.sqrt(3);
 
 var shapes = {
 
 Hex: {
 	name: 'Hexagon',
 	uW: 1.0,
-	uH: Math.sin(Math.PI / 3.0),
+	uH: 0.5*sqrt3,
 	uPts: [
 		[0.5,0.0],
-		[0.25,0.433012701892],
-		[-0.25,0.433012701892],
+		[0.25,0.25*sqrt3],
+		[-0.25,0.25*sqrt3],
 		[-0.5,0.0],
-		[-0.25,-0.433012701892],
-		[0.25,-0.433012701892]
+		[-0.25,-0.25*sqrt3],
+		[0.25,-0.25*sqrt3]
 	],
 
 	viewBoxFor: function (rows, cols) {
@@ -237,18 +238,18 @@ Hex: {
 
 Pen: {
 	name: 'Pentagon (Cairo)',
-	uW: 1.7320508075689,
-	uH: 1.3660254037845,
+	uW: sqrt3,
+	uH: 0.5*(sqrt3 + 1),
 	uPts: [
-		[0.0,0.683012701892],
-		[0.866025403784,0.183012701892],
-		[0.366025403784,-0.683012701892],
-		[-0.366025403784,-0.683012701892],
-		[-0.866025403784,0.183012701892]
+		[0.0,0.25*(sqrt3 + 1)],
+		[0.5*sqrt3,0.25*(sqrt3 - 1)],
+		[0.5*(sqrt3 - 1),-0.25*(sqrt3+1)],
+		[-0.5*(sqrt3 - 1),-0.25*(sqrt3+1)],
+		[-0.5*sqrt3,0.25*(sqrt3 - 1)]
 	],
 
 	viewBoxFor: function (rows, cols) {
-		return '0 0 '+0.8660254037845*(cols+1.25)+' '+this.uW*(rows+0.7);
+		return '0 0 '+0.5*sqrt3*(cols+1.25)+' '+sqrt3*(rows+0.7);
 	},
 
 	getRotation: function (row, col) {
@@ -264,15 +265,15 @@ Pen: {
 	},
 
 	getOffset: function (row, col) {
-		var xo = 1.125 - 0.366025403784*(row&1) + 0.683012701892*col;
-		var yo = this.uW*(row + 1.1);
+		var xo = 1.125 + (sqrt3 - 1)*(Math.floor(col/4) - 0.5*(row&1)) + 0.25*(sqrt3 + 1)*col;
+		var yo = sqrt3*(row + 1.1) - 0.25*(3*sqrt3 - 1)*(col & 1);
 
 		if (row & 1) {
-			xo += 0.366025403784*(2*Math.floor(col/4) + (col & 3 ? 1 : 0) + (col & 2 ? 1 : 0));
-			yo -= 1.0490381056762499*(col & 1) - 0.366025403784*((col & 3) == 1);
+			xo += 0.5*(sqrt3 - 1)*((col & 3 ? 1 : 0) + (col & 2 ? 1 : 0));
+			yo += 0.5*(sqrt3 - 1)*((col & 3) == 1);
 		} else {
-			xo += 0.366025403784*(2*Math.floor(col/4) + ((col & 3) == 3));
-			yo -= 1.0490381056762499*(col & 1) - 0.366025403784*((col & 3) == 3);
+			xo += 0.5*(sqrt3 - 1)*((col & 3) == 3);
+			yo += 0.5*(sqrt3 - 1)*((col & 3) == 3);
 		}
 
 		return [xo, yo];
