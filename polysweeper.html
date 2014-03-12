@@ -185,11 +185,17 @@ var XLINKNS = "http://www.w3.org/1999/xlink";
 var G;
 var sqrt3 = Math.sqrt(3);
 
+/* Compatability Functions:
+ * IE and WebKit do not support classList for SVG elements, so
+ * we fake it here. The "correct" solution is to add a classList
+ * shim, but this should work for now.
+ */
+
 function compatCLAdd(el, cName) {
 	if (el.classList) {
 		el.classList.add(cName);
 	} else {
-		el.className = el.className + ' ' + cName;
+		el.className.baseVal = (el.className.baseVal||'') + ' ' + cName;
 	}
 }
 
@@ -197,13 +203,13 @@ function compatCLToggle(el, cName) {
 	if (el.classList) {
 		el.classList.toggle(cName);
 	} else {
-		var c = el.className.split(/\s+/);
+		var c = (el.className.baseVal||'').split(/\s+/);
 		var idx = c.indexOf(cName);
-		if (idx) {
+		if (idx != -1) {
 			c.splice(idx, 1);
-			el.className = c.join(' ');
+			el.className.baseVal = c.join(' ');
 		} else {
-			el.className = el.className + ' ' + cName;
+			el.className.baseVal = (el.className.baseVal||'') + ' ' + cName;
 		}
 	}
 }
