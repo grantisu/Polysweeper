@@ -429,8 +429,11 @@ PenF: { /* Abandon hope, all ye who enter here */
 		[0.0, -0.5],
 	],
 
+	/* Determined empirically */
 	viewBoxFor: function (rows, cols) {
-		return '0 0 '+0.5*sqrt3*(cols + (rows / 6) +1.25)+' '+(1.25*rows+0.1);
+		return '0 0 '+
+		(0.706*cols + 0.375*rows + 0.25)+' '+
+		(1.125*rows+0.0722*Math.floor(0.3333*(cols+2))+0.5);
 	},
 
 	getRotation: function (row, col) {
@@ -448,7 +451,7 @@ PenF: { /* Abandon hope, all ye who enter here */
 		var u = (f == 2 || f == 3 || f == 4) ? 1 : 0;
 		var w = u ? 1 - 2*(row&1) : 2*(row&1) - 1;
 
-		var xo = 1.625 + 0.75*(col - g) - 0.75*((w + r)*(f == 2) + ((f == 3) + (f == 4))*(1-r) - (w-2*r)*(f == 5) - Math.floor(row/2));
+		var xo = 0.6 + 0.75*(col - g) - 0.75*((w + r)*(f == 2) + ((f == 3) + (f == 4))*(1-r) - (w-2*r)*(f == 5) - Math.floor(row/2));
 		var yo = 1.05 + 0.625*sqrt3*row - 0.125*sqrt3*r + 0.25*sqrt3*(w*(p & 1) + (f == 1) - (w+r)*(f == 2) + r*(f == 3) + (1-r*w)*(f == 4)) + 0.25*sqrt3*g;
 		
 		return [xo, yo];
