@@ -989,7 +989,7 @@ function Game(shape, rows, cols, bombs, board, sbTime, sbScore, hiScore) {
 	}
 
 	this.svg.onmouseup = this.boardClick.bind(this);
-	this.svg.oncontextmenu = function (ev) { return false; };
+	this.board.oncontextmenu = function (ev) { return false; };
 
 	hiScore.onclick = function (ev) { this.showHiScore(); }.bind(this);
 
@@ -1143,7 +1143,7 @@ Game.prototype.end = function (score) {
 
 	this.sInt = undefined;
 	this.svg.onmouseup = undefined;
-	this.svg.oncontextmenu = undefined;
+	this.board.oncontextmenu = undefined;
 };
 
 Game.prototype.boardClick = function (ev) {
