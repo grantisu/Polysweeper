@@ -132,7 +132,7 @@ polygon {
 	fill: url(#grayMesa);
 }
 
-.clicked {
+.clicked:not(.bomb):not(.flagged) {
 	fill:white;
 	fill-opacity:0;
 	stroke-width:0.01;
@@ -143,7 +143,7 @@ polygon {
 	fill-opacity:1;
 }
 
-.flagged.clicked {
+.flagged.clicked:not(.bomb) {
 	fill-opacity: 0.5;
 }
 
@@ -1217,6 +1217,7 @@ Game.prototype.revealNodeHelper = function () {
 		el.clickable = false;
 		var row = el.row;
 		var col = el.col;
+		compatCLAdd(el, 'clicked');
 
 		if (el.bomb) {
 			if (this.revealedCount == 0) {
@@ -1236,7 +1237,6 @@ Game.prototype.revealNodeHelper = function () {
 				}
 			}
 		} else {
-			compatCLAdd(el, 'clicked');
 		}
 		
 		if (el.count) {
