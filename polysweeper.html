@@ -1096,7 +1096,7 @@ Game.prototype.updateSize = function (ev) {
 	}).reduce(sum);
 
 	/* Set svg max-height to 85% of the available space, assuming a 16 pixel em */
-	this.svg.style.maxHeight = 0.0531*(mH-oH)+'em';
+	this.svg.style.setProperty('max-height', 0.0531*(mH-oH)+'em');
 	document.getElementById('outerDiv').style.width = (window.innerWidth - 360)+'px';
 };
 
