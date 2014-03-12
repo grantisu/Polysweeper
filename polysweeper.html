@@ -180,6 +180,29 @@ var XLINKNS = "http://www.w3.org/1999/xlink";
 var G;
 var sqrt3 = Math.sqrt(3);
 
+function compatCLAdd(el, cName) {
+	if (el.classList) {
+		el.classList.add(cName);
+	} else {
+		el.className = el.className + ' ' + cName;
+	}
+}
+
+function compatCLToggle(el, cName) {
+	if (el.classList) {
+		el.classList.toggle(cName);
+	} else {
+		var c = el.className.split(/\s+/);
+		var idx = c.indexOf(cName);
+		if (idx) {
+			c.splice(idx, 1);
+			el.className = c.join(' ');
+		} else {
+			el.className = el.className + ' ' + cName;
+		}
+	}
+}
+
 var shapes = {
 
 Hex: {
@@ -1120,7 +1143,7 @@ Game.prototype.boardClick = function (ev) {
 		if (ev.button == 0) {
 			this.revealNode(el);
 		} else if (el.clickable && ev.button == 2) {
-			el.classList.toggle('flagged');
+			compatCLToggle(el, 'flagged');
 			el.flagged = !el.flagged;
 			this.bombMarked += el.flagged ? 1 : -1;
 		} else if (
@@ -1163,13 +1186,7 @@ Game.prototype.addTextFor = function (node) {
 	t.textContent = node.count;
 	t.setAttribute('class', 'ptext');
 	if (node.count < 10) {
-		if (t.classList) {
-			/* Correct SVG DOM implementation */
-			t.classList.add('ptext' + node.count);
-		} else {
-			/* IE and Non-Chrome WebKit */
-			t.className = t.className + ' ptext' + node.count;
-		}
+		compatCLAdd(t, 'ptext'+node.count);
 	}
 	t.setAttribute('transform', 'translate('+off[0]+','+(off[1]+0.125)+')');
 
@@ -1186,7 +1203,7 @@ Game.prototype.revealNodeHelper = function () {
 		el.clickable = false;
 		var row = el.row;
 		var col = el.col;
-		el.setAttribute('class', 'clicked');
+		compatCLAdd(el, 'clicked');
 
 		if (el.bomb) {
 			if (this.revealedCount == 0) {
@@ -1305,11 +1322,6 @@ function initPage() {
 	    !document.createElementNS(SVGNS, 'svg').createSVGRect
 	) {
 		alert('ERROR: Your browser does not support SVG.');
-		return null;
-	}
-
-	if (!document.documentElement.classList) {
-		alert('ERROR: Your browser does not support the classList API.')
 		return null;
 	}
 
