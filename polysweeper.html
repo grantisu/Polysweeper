@@ -138,8 +138,13 @@ polygon {
 	stroke-width:0.01;
 }
 
-.flagged {
+.flagged, .flagged.bomb {
 	fill: url(#yellowMesa);
+	fill-opacity:1;
+}
+
+.flagged.clicked {
+	fill-opacity: 0.5;
 }
 
 .bomb {
@@ -1199,11 +1204,10 @@ Game.prototype.revealNodeHelper = function () {
 	while(this.nodesToReveal.length > 0) {
 		var el = this.nodesToReveal.pop();
 
-		if (!(el && (el.clickable && !el.flagged))) { continue; }
+		if (!(el && (!this.sInt || el.clickable && !(el.flagged)))) { continue; }
 		el.clickable = false;
 		var row = el.row;
 		var col = el.col;
-		compatCLAdd(el, 'clicked');
 
 		if (el.bomb) {
 			if (this.revealedCount == 0) {
@@ -1212,7 +1216,7 @@ Game.prototype.revealNodeHelper = function () {
 				el.bomb = undefined;
 				this.mapAround(decCount,el);
 			} else {
-				el.setAttribute('class', 'bomb');
+				compatCLAdd(el, 'bomb');
 				if (this.sInt) {
 					this.end();
 					for (var j = 0; j < this.cols; j++) {
@@ -1222,6 +1226,8 @@ Game.prototype.revealNodeHelper = function () {
 					}
 				}
 			}
+		} else {
+			compatCLAdd(el, 'clicked');
 		}
 		
 		if (el.count) {
