@@ -559,17 +559,17 @@ PenF: { /* Abandon hope, all ye who enter here */
 
 Sqr: {
 	name: 'Square',
-	uW: 1.0,
-	uH: 1.0,
+	uW: 0.8,
+	uH: 0.8,
 	uPts: [
-		[-0.5,-0.5],
-		[0.5,-0.5],
-		[0.5,0.5],
-		[-0.5,0.5]
+		[-0.4,-0.4],
+		[0.4,-0.4],
+		[0.4,0.4],
+		[-0.4,0.4]
 	],
 
 	viewBoxFor: function (rows, cols) {
-		return '0 0 ' + (cols+0.2) + ' ' + (rows+0.2);
+		return '0 0 ' + this.uW*(cols+0.2) + ' ' + this.uH*(rows+0.2);
 	},
 
 	getRotation: function (row, col) {
@@ -577,7 +577,7 @@ Sqr: {
 	},
 
 	getOffset: function (row, col) {
-		return [col + 0.6, row + 0.6];
+		return [this.uW*(col + 0.6), this.uH*(row + 0.6)];
 	},
 
 	getAdjacency: function (row, col) {
