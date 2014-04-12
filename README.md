@@ -11,5 +11,6 @@ Features:
 - Five different polygon types
 - Adjustable board size & bomb count
 - High Score list
-- One file: no compilation step; no server needed; works on most smartphones
+- One file: no compilation step; no server needed
+- Works on most smartphones
 
