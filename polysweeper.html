@@ -95,7 +95,7 @@ select {
 	margin: 0 auto;
 }
 
-#theButton {
+#resetButton {
 	display: block;
 	margin: 1em auto;
 }
@@ -1317,7 +1317,7 @@ function buildBoard() {
 		document.getElementById('hiScore')
 	);
 
-	document.getElementById('theButton').textContent = 'Reset';
+	document.getElementById('resetButton').textContent = 'Reset';
 
 	window.onresize = G.updateSize.bind(G);
 	G.updateSize();
@@ -1385,7 +1385,7 @@ function initPage() {
 </li>
 </ul>
 
-<button id='theButton' type='button' onclick='buildBoard()'>Start</button>
+<button id='resetButton' type='button' onclick='buildBoard()'>Start</button>
 <div id='theBoard'></div>
 <div id='theTime'></div>
 <div id='theCount'></div>
