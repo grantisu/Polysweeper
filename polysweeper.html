@@ -1030,6 +1030,24 @@ Game.prototype.initSVG = function () {
 	this.svg.appendChild(this.pg);
 };
 
+function setDifficulty(ev) {
+	var val = ev.target.value;
+
+	if (val == 'custom') {
+		gElById('bombCount').disabled = false;
+		gElById('rowCount').disabled = false;
+		gElById('colCount').disabled = false;
+	} else {
+		var v = val.split(':');
+		gElById('bombCount').disabled = true;
+		gElById('rowCount').disabled = true;
+		gElById('colCount').disabled = true;
+		gElById('bombCount').value = v[0];
+		gElById('rowCount').value = v[1];
+		gElById('colCount').value = v[2];
+	}
+}
+
 function buildBoard() {
 
 	var bStart = Date.now();
@@ -1086,6 +1104,7 @@ function initPage() {
 
 	st.value = localStorage.getItem('lastShape') || 'Hex';
 	st.onchange = function (ev) { localStorage.setItem('lastShape', ev.target.value); };
+	gElById('difficulty').onchange = setDifficulty;
 	buildBoard();
 }
 
@@ -1112,6 +1131,15 @@ function initPage() {
 <li>
 <label for='colCount'>Cols</label>
 <input type='text' name='colCount' id='colCount' value=30>
+</li>
+<li>
+<label for='difficulty'>Difficulty</label>
+<select name='difficulty' id='difficulty' value='40:16:16'>
+<option value="10:9:9">Easy</option>
+<option value="40:16:16">Medium</option>
+<option value="99:16:30">Hard</option>
+<option value="custom">Custom</option>
+</select>
 </li>
 </ul>
 
