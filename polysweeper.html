@@ -185,6 +185,8 @@ var XLINKNS = "http://www.w3.org/1999/xlink";
 var G;
 var sqrt3 = Math.sqrt(3);
 
+function gElById (id) { return document.getElementById(id); }
+
 /* Compatability Functions:
  * IE and WebKit do not support classList for SVG elements, so
  * we fake it here. The "correct" solution is to add a classList
@@ -825,7 +827,7 @@ Game.prototype.updateSize = function (ev) {
 
 	/* Set svg max-height to 85% of the available space, assuming a 16 pixel em */
 	this.svg.style.setProperty('max-height', 0.0531*(mH-oH)+'em');
-	document.getElementById('outerDiv').style.width = (window.innerWidth - 40)+'px';
+	gElById('outerDiv').style.width = (window.innerWidth - 40)+'px';
 };
 
 Game.prototype.scoreKey = function () {
@@ -1035,17 +1037,17 @@ function buildBoard() {
 	if (G && G.sInt) { G.end(); }
 
 	G = new Game(
-		shapes[document.getElementById('shapeType').value],
-		parseInt(document.getElementById('rowCount').value),
-		parseInt(document.getElementById('colCount').value),
-		parseInt(document.getElementById('bombCount').value),
-		document.getElementById('theBoard'),
-		document.getElementById('theTime'),
-		document.getElementById('theCount'),
-		document.getElementById('hiScore')
+		shapes[gElById('shapeType').value],
+		parseInt(gElById('rowCount').value),
+		parseInt(gElById('colCount').value),
+		parseInt(gElById('bombCount').value),
+		gElById('theBoard'),
+		gElById('theTime'),
+		gElById('theCount'),
+		gElById('hiScore')
 	);
 
-	document.getElementById('resetButton').textContent = 'Reset';
+	gElById('resetButton').textContent = 'Reset';
 
 	window.onresize = G.updateSize.bind(G);
 	G.updateSize();
@@ -1059,7 +1061,7 @@ function buildBoard() {
 }
 
 function initPage() {
-	var st = document.getElementById('shapeType');
+	var st = gElById('shapeType');
 
 	if (!document.createElementNS ||
 	    !document.createElementNS(SVGNS, 'svg').createSVGRect
@@ -1068,7 +1070,7 @@ function initPage() {
 		return null;
 	}
 
-	var hs = document.getElementById('hiScore')
+	var hs = gElById('hiScore')
 	if (!Storage) {
 		hs.disabled = true;
 	} else {
