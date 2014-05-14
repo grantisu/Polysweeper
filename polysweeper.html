@@ -1113,6 +1113,9 @@ function initPage() {
 	st.value = localStorage.getItem('lastShape') || 'Hex';
 	st.onchange = function (ev) { localStorage.setItem('lastShape', ev.target.value); };
 	gElById('difficulty').onchange = setDifficulty;
+	gElById('difficulty').value = '40:16:16';
+	setDifficulty({'target':{'value':'40:16:16'}});
+
 	buildBoard();
 }
 
@@ -1130,19 +1133,19 @@ function initPage() {
 </li>
 <li>
 <label for='bombCount'>Bombs</label>
-<input type='text' name='bombCount' id='bombCount' value=49>
+<input type='text' name='bombCount' id='bombCount'>
 </li>
 <li>
 <label for='rowCount'>Rows</label>
-<input type='text' name='rowCount' id='rowCount' value=16>
+<input type='text' name='rowCount' id='rowCount'>
 </li>
 <li>
 <label for='colCount'>Cols</label>
-<input type='text' name='colCount' id='colCount' value=30>
+<input type='text' name='colCount' id='colCount'>
 </li>
 <li>
 <label for='difficulty'>Difficulty</label>
-<select name='difficulty' id='difficulty' value='40:16:16'>
+<select name='difficulty' id='difficulty'>
 <option value="10:9:9">Easy</option>
 <option value="40:16:16">Medium</option>
 <option value="99:16:30">Hard</option>
