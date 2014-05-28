@@ -830,9 +830,11 @@ Game.prototype.updateScore = function () {
 
 Game.prototype.updateSize = function (ev) {
 	var mH = window.innerHeight;
-	var oH = ['h1', 'ul', 'button', 'button'].map(function (tag) {
-		return document.getElementsByTagName(tag)[0].offsetHeight;
+	var oH = ['theTitle', 'theMenu', 'resetButton', 'hiScore', 'theFooter'].map(function (tag) {
+		return gElById(tag).offsetHeight;
 	}).reduce(sum);
+
+	oH *= 1.15; /* 15% fudge factor */
 
 	/* Set svg max-height to 85% of the available space, assuming a 16 pixel em */
 	this.svg.style.setProperty('max-height', 0.0531*(mH-oH)+'em');
@@ -1124,10 +1126,10 @@ function initPage() {
 </head>
 <body onload='initPage()'>
 
-<h1>Polysweeper</h1>
+<h1 id='theTitle'>Polysweeper</h1>
 
 <div id='outerDiv'>
-<ul>
+<ul id='theMenu'>
 <li>
 <label for='shapeType'>Shape</label>
 <select name='shapeType' id='shapeType' value='Hex'></select>
