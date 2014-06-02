@@ -836,8 +836,8 @@ Game.prototype.updateSize = function (ev) {
 
 	oH *= 1.15; /* 15% fudge factor */
 
-	/* Set svg max-height to 85% of the available space, assuming a 16 pixel em */
-	this.svg.style.setProperty('max-height', 0.0531*(mH-oH)+'em');
+	/* Set svg height to 85% of the available space, assuming a 16 pixel em */
+	this.svg.setAttribute('height', 0.0531*(mH-oH)+'em');
 	gElById('outerDiv').style.width = (window.innerWidth - 40)+'px';
 };
 
