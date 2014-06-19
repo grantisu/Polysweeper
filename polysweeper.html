@@ -1081,7 +1081,7 @@ function buildBoard() {
 	G.updateTime();
 	G.sInt = setInterval(G.updateTime.bind(G), 300);
 
-	bEnd = Date.now();
+	var bEnd = Date.now();
 
 	console.log('Board built in '+(bEnd-bStart)+' msec');
 }
