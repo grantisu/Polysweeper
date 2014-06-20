@@ -58,7 +58,10 @@ svg {
 	z-index: 1;
 }
 
-ul { list-style: none; }
+ul {
+	list-style: none;
+	z-index: 2;
+}
 
 li {
 	display: inline-block;
@@ -1125,7 +1128,6 @@ function initPage() {
 
 <h1 id='theTitle'>Polysweeper</h1>
 
-<div id='outerDiv'>
 <ul id='theMenu'>
 <li>
 <label for='shapeType'>Shape</label>
@@ -1154,6 +1156,7 @@ function initPage() {
 </li>
 </ul>
 
+<div id='outerDiv'>
 <button id='resetButton' type='button' onclick='buildBoard()'>Start</button>
 <div id='theBoard'></div>
 <div id='theTime'></div>
