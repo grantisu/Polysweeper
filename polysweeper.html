@@ -730,7 +730,7 @@ function Game(shape, rows, cols, bombs, board, sbTime, sbScore, hiScore) {
 		this.addRandomBomb();
 	}
 
-	this.svg.onmouseup = this.boardClick.bind(this);
+	this.svg.onmouseup = this.boardMouseUp.bind(this);
 	this.board.oncontextmenu = function (ev) { return false; };
 
 	hiScore.onclick = function (ev) { this.showHiScore(); }.bind(this);
@@ -888,7 +888,7 @@ Game.prototype.end = function (score) {
 	this.board.oncontextmenu = undefined;
 };
 
-Game.prototype.boardClick = function (ev) {
+Game.prototype.boardMouseUp = function (ev) {
 	var el = ev.target;
 
 	try{
