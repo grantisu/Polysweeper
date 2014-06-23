@@ -730,6 +730,8 @@ function Game(shape, rows, cols, bombs, board, sbTime, sbScore, hiScore) {
 		this.addRandomBomb();
 	}
 
+	this.svg.onmouseout = this.boardMouseOut.bind(this);
+	this.svg.onmousedown = this.boardMouseDown.bind(this);
 	this.svg.onmouseup = this.boardMouseUp.bind(this);
 	this.board.oncontextmenu = function (ev) { return false; };
 
@@ -884,12 +886,56 @@ Game.prototype.end = function (score) {
 	}
 
 	this.sInt = undefined;
+	this.svg.onmouseout = undefined;
+	this.svg.onmousedown = undefined;
 	this.svg.onmouseup = undefined;
 	this.board.oncontextmenu = undefined;
 };
 
+Game.prototype.boardMouseOut = function (ev) {
+	if (this.clickTimeout > 0) {
+		clearTimeout(this.clickTimeout);
+		this.clickTimeout = -1;
+	} else if (
+		this.clickTimeout == 0 &&
+		ev.buttons == 1 &&
+		ev.relatedTarget
+	) {
+		this.unarmClick = 1;
+		this.boardMouseDown({'target': ev.relatedTarget, 'buttons': 1});
+	}
+};
+
+Game.prototype.boardMouseDown = function (ev) {
+	var el = ev.target;
+
+	if (ev.buttons != 1) {
+		return false;
+	}
+
+	try{
+		var self = this;
+		this.clickTimeout = setTimeout( function () {
+			self.boardMouseUp({'target': el, 'buttons': 2});
+		}, 400);
+	} catch (err) {
+		alert(err);
+		this.end();
+	}
+	return false;
+};
+
 Game.prototype.boardMouseUp = function (ev) {
 	var el = ev.target;
+	var oldTO = this.clickTimeout;
+	this.clickTimeout = 0;
+
+	if (oldTO > 0) {
+		clearTimeout(oldTO);
+	} else if (oldTO == -1 || this.unarmClick) {
+		this.unarmClick = 0;
+		return false;
+	}
 
 	try{
 		if (!this.start) {
