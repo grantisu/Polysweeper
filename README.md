@@ -14,3 +14,5 @@ Features:
 - One file: no compilation step; no server needed
 - Works on most smartphones
 
+See it in action: <http://polysweeper.gmathews.com>
+
