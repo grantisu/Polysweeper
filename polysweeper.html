@@ -899,9 +899,7 @@ Game.prototype.boardClick = function (ev) {
 		if (ev.button == 0) {
 			this.revealNode(el);
 		} else if (el.clickable && ev.button == 2) {
-			compatCLToggle(el, 'flagged');
-			el.flagged = !el.flagged;
-			this.bombMarked += el.flagged ? 1 : -1;
+			this.flagNode(el);
 		} else if (
 		  !el.clickable &&
 		  ev.button == 2 &&
@@ -929,7 +927,13 @@ Game.prototype.checkReveal = function (n) {
 	var k = n ? n.row+':'+n.col : '0';
 	var r = (n && n.clickable && !this.nodesRevealed[k]);
 	this.nodesRevealed[k] = true;
-	return r; 
+	return r;
+};
+
+Game.prototype.flagNode = function (el) {
+	compatCLToggle(el, 'flagged');
+	el.flagged = !el.flagged;
+	this.bombMarked += el.flagged ? 1 : -1;
 };
 
 Game.prototype.addTextFor = function (node) {
