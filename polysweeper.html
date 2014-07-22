@@ -730,6 +730,7 @@ function Game(shape, rows, cols, bombs, board, sbTime, sbScore, hiScore) {
 		this.addRandomBomb();
 	}
 
+	this.svg.ontouchstart = this.boardTap.bind(this);
 	this.svg.onmouseup = this.boardClick.bind(this);
 	this.board.oncontextmenu = function (ev) { return false; };
 
@@ -888,8 +889,43 @@ Game.prototype.end = function (score) {
 	this.board.oncontextmenu = undefined;
 };
 
+Game.prototype.boardTap = function (ev) {
+	if (this.touched) {
+		this.touched = 0;
+		return true;
+	}
+
+	var el = ev.target;
+	var self = this;
+
+	this.touched = window.setTimeout(
+		function () {
+			self.touched = 0;
+			self.fired = 1;
+			if (el.clickable) {
+				self.flagNode(el);
+			} else {
+				self.revealAroundNode(el);
+			}
+
+			self.updateScore();
+		},
+		350
+	);
+};
+
 Game.prototype.boardClick = function (ev) {
 	var el = ev.target;
+
+	if (this.touched) {
+		window.clearTimeout(this.touched);
+		this.touched = 0;
+	}
+
+	if (this.fired) {
+		this.fired = 0;
+		return false;
+	}
 
 	try{
 		if (!this.start) {
@@ -900,13 +936,8 @@ Game.prototype.boardClick = function (ev) {
 			this.revealNode(el);
 		} else if (el.clickable && ev.button == 2) {
 			this.flagNode(el);
-		} else if (
-		  !el.clickable &&
-		  ev.button == 2 &&
-		  el.count &&
-		  this.mapAround(isFlagged, el).reduce(sum) == el.count
-		) {
-			this.mapAround(this.revealNode.bind(this), el);
+		} else if (!el.clickable && ev.button == 2) {
+			this.revealAroundNode(el);
 		}
 
 		this.updateScore();
@@ -915,7 +946,7 @@ Game.prototype.boardClick = function (ev) {
 		alert(err);
 		this.end();
 	}
-	return false;
+	return ev.button == 2;
 };
 
 Game.prototype.revealNode = function (el) {
@@ -928,6 +959,15 @@ Game.prototype.checkReveal = function (n) {
 	var r = (n && n.clickable && !this.nodesRevealed[k]);
 	this.nodesRevealed[k] = true;
 	return r;
+};
+
+Game.prototype.revealAroundNode = function (el) {
+	if (
+	  el.count &&
+	  this.mapAround(isFlagged, el).reduce(sum) == el.count
+	) {
+		this.mapAround(this.revealNode.bind(this), el);
+	}
 };
 
 Game.prototype.flagNode = function (el) {
