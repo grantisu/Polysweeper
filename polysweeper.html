@@ -854,17 +854,13 @@ Game.prototype.scoreKey = function () {
 
 Game.prototype.showHiScore = function (msg) {
 	var scoreStr = msg ? msg+"\n\n" : '';
-	if (!!Storage) {
-		var slist = localStorage.getItem(this.scoreKey());
+	var slist = localStorage.getItem(this.scoreKey());
 
-		if (slist) {
-			slist = JSON.parse(slist);
-			scoreStr += "High Scores:\n"+slist.join("\n");
-		} else {
-			scoreStr += "No high scores yet!";
-		}
+	if (slist) {
+		slist = JSON.parse(slist);
+		scoreStr += "High Scores:\n"+slist.join("\n");
 	} else {
-		scoreStr += "ERR: your browser does not support local storage.";
+		scoreStr += "No high scores yet!";
 	}
 
 	alert(scoreStr);
@@ -1158,10 +1154,11 @@ function initPage() {
 	}
 
 	var hs = gElById('hiScore')
-	if (!Storage) {
+	try {
+		localStorage.setItem('TEST', '!');
+		localStorage.removeItem('TEST');
+	} catch(e) {
 		hs.disabled = true;
-	} else {
-		hs.disabled = false;
 	}
 
 	for (var s in shapes) {
@@ -1171,8 +1168,10 @@ function initPage() {
 		st.appendChild(o);
 	}
 
-	st.value = localStorage.getItem('lastShape') || 'Hex';
-	st.onchange = function (ev) { localStorage.setItem('lastShape', ev.target.value); };
+	if (!hs.disabled) {
+		st.value = localStorage.getItem('lastShape') || 'Hex';
+		st.onchange = function (ev) { localStorage.setItem('lastShape', ev.target.value); };
+	}
 	gElById('difficulty').onchange = setDifficulty;
 	gElById('difficulty').value = '40:16:16';
 	setDifficulty({'target':{'value':'40:16:16'}});
